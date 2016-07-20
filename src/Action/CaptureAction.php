@@ -7,7 +7,6 @@ use Payum\Core\ApiAwareInterface;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
 use Payum\Core\Exception\UnsupportedApiException;
-use Payum\Core\Reply\HttpPostRedirect;
 use Payum\Core\Request\Capture;
 use Payum\Core\Request\GetHttpRequest;
 use PayumTW\Esunbank\Api;
@@ -48,10 +47,7 @@ class CaptureAction extends GatewayAwareAction implements ApiAwareInterface
         if (isset($httpRequest->query['DATA']) === true) {
             $model->replace($this->api->parseResult($httpRequest->query['DATA']));
         } else {
-            throw new HttpPostRedirect(
-                $this->api->getApiEndpoint(),
-                $this->api->capture($model->toUnsafeArray(), $request)
-            );
+            throw $this->api->request($model->toUnsafeArray(), $request);
         }
     }
 

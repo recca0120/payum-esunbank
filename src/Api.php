@@ -1,10 +1,10 @@
 <?php
 
-namespace PayumTw\Esunbank;
+namespace PayumTW\Esunbank;
 
 use Http\Message\MessageFactory;
-use Payum\Core\Exception\Http\HttpException;
 use Payum\Core\HttpClientInterface;
+use Payum\Core\Reply\HttpPostRedirect;
 
 class Api
 {
@@ -98,26 +98,6 @@ class Api
     }
 
     /**
-     * @param array $fields
-     *
-     * @return array
-     */
-    protected function doRequest($method, array $fields)
-    {
-        $headers = [];
-
-        $request = $this->messageFactory->createRequest($method, $this->getApiEndpoint(), $headers, http_build_query($fields));
-
-        $response = $this->client->send($request);
-
-        if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
-            throw HttpException::factory($request, $response);
-        }
-
-        return $response;
-    }
-
-    /**
      * getApiEndpoint.
      *
      * @return string
@@ -136,14 +116,14 @@ class Api
     }
 
     /**
-     * prepare.
+     * request.
      *
      * @param array $params
      * @param mixed $request
      *
      * @return array
      */
-    public function capture(array $params, $request)
+    public function request(array $params, $request)
     {
         $supportedParams = [
             // 特店代碼
@@ -169,11 +149,27 @@ class Api
 
         $params = json_encode($params);
 
-        return [
+        return new HttpPostRedirect($this->getApiEndpoint(), [
             'data' => $params,
             'mac'  => $this->generateKey($params),
             'ksn'  => 1,
-        ];
+        ]);
+    }
+
+    /**
+     * generateKey.
+     *
+     * @param array $params
+     *
+     * @return string
+     */
+    protected function generateKey($params)
+    {
+        if (is_array($params) === true) {
+            $params = json_encode($params);
+        }
+
+        return hash('sha256', $params.$this->options['M']);
     }
 
     /**
@@ -183,7 +179,7 @@ class Api
      *
      * @return string
      */
-    public function getRedirectUrl($request)
+    protected function getRedirectUrl($request)
     {
         $scheme = parse_url($request->getToken()->getTargetUrl());
 
@@ -221,21 +217,5 @@ class Api
         }
 
         return $statusReason;
-    }
-
-    /**
-     * generateKey.
-     *
-     * @param array $params
-     *
-     * @return string
-     */
-    protected function generateKey($params)
-    {
-        if (is_array($params) === true) {
-            $params = json_encode($params);
-        }
-
-        return hash('sha256', $params.$this->options['M']);
     }
 }
