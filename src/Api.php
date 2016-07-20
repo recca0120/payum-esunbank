@@ -143,7 +143,7 @@ class Api
      *
      * @return array
      */
-    public function prepare(array $params, $request)
+    public function capture(array $params, $request)
     {
         $supportedParams = [
             // 特店代碼
@@ -171,7 +171,7 @@ class Api
 
         return [
             'data' => $params,
-            'mac'  => hash('sha256', $params.$this->options['M']),
+            'mac'  => $this->generateKey($params),
             'ksn'  => 1,
         ];
     }
@@ -213,7 +213,7 @@ class Api
      *
      * @return string
      */
-    public function getStatusReason($code)
+    protected function getStatusReason($code)
     {
         $statusReason = '拒絕交易';
         if (isset($this->code[$code]) === true) {
@@ -221,5 +221,21 @@ class Api
         }
 
         return $statusReason;
+    }
+
+    /**
+     * generateKey.
+     *
+     * @param array $params
+     *
+     * @return string
+     */
+    protected function generateKey($params)
+    {
+        if (is_array($params) === true) {
+            $params = json_encode($params);
+        }
+
+        return hash('sha256', $params.$this->options['M']);
     }
 }

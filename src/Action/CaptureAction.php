@@ -50,7 +50,7 @@ class CaptureAction extends GatewayAwareAction implements ApiAwareInterface
         } else {
             throw new HttpPostRedirect(
                 $this->api->getApiEndpoint(),
-                $this->api->prepare($model->toUnsafeArray(), $request)
+                $this->api->capture($model->toUnsafeArray(), $request)
             );
         }
     }
