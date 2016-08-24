@@ -105,13 +105,13 @@ class Api
      */
     public function getApiEndpoint()
     {
-        $isDesktop = $this->isDesktop(),
+        $isMobile = $this->isMobile();
         if ($this->options['sandbox'] === false) {
-            return $isDesktop === true ?
+            return $isMobile === false ?
                 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
                 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
         } else {
-            return $isDesktop === true ?
+            return $isMobile === false ?
                 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
                 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
         }
@@ -208,11 +208,11 @@ class Api
     }
 
     /**
-     * isDesktop.
+     * isMobile.
      *
-     * @return bool [description]
+     * @return bool
      */
-    protected function isDesktop()
+    protected function isMobile()
     {
         $detect = new MobileDetect();
 
