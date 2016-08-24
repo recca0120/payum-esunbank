@@ -2,6 +2,7 @@
 
 namespace PayumTW\Esunbank;
 
+use Detection\MobileDetect;
 use Http\Message\MessageFactory;
 use Payum\Core\HttpClientInterface;
 use Payum\Core\Reply\HttpPostRedirect;
@@ -104,12 +105,13 @@ class Api
      */
     public function getApiEndpoint()
     {
+        $isDesktop = $this->isDesktop(),
         if ($this->options['sandbox'] === false) {
-            return $this->options['desktop'] === true ?
+            return $isDesktop === true ?
                 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
                 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
         } else {
-            return $this->options['desktop'] === true ?
+            return $isDesktop === true ?
                 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
                 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
         }
@@ -217,5 +219,17 @@ class Api
         }
 
         return $statusReason;
+    }
+
+    /**
+     * isDesktop.
+     *
+     * @return bool [description]
+     */
+    protected function isDesktop()
+    {
+        $detect = new MobileDetect();
+
+        return $detect->isMobile() === false && $detect->isTablet() === false;
     }
 }
