@@ -29,33 +29,22 @@ class Api
     protected $code = [
         '00' => '核准',
         '01' => '請查詢銀行',
+        '02' => '請查詢銀行',
+        '05' => '請查詢銀行',
+        '14' => '卡號錯誤',
         '33' => '過期卡',
-        '54' => '卡片過期',
-        '62' => '尚未開卡',
+        '54' => '有效年月過期',
+        'E1' => '卡片過期',
+        'EI' => '未開卡',
+        'EE' => '持卡人 ID 錯誤',
         'L1' => '產品代碼錯誤',
         'L2' => '期數錯誤',
         'L3' => '不支援分期(他行卡)',
         'L4' => '產品代碼過期',
         'L5' => '金額無效',
         'L6' => '不支援分期',
-        'L7' => '非限定卡別交易',
-        'XA' => '紅利自付額有誤',
-        'XB' => '紅利商品數量有誤',
-        'XC' => '紅利商品數量超過可折抵上限',
-        'XD' => '紅利商品折抵點數超過最高折',
-        'XE' => '紅利商品傳入之固定點數有誤',
-        'XF' => '紅利折抵金額超過消費金額',
-        'X1' => '不允許使用紅利折抵現金功能',
-        'X2' => '點數未達可折抵點數下限',
-        'X3' => '他行卡不支援紅利折抵',
-        'X4' => '此活動已逾期',
-        'X5' => '金額未超過限額不允許使用',
-        'X6' => '特店不允許紅利交易',
-        'X7' => '點數不足',
-        'X8' => '非正卡持卡人',
-        'X9' => '紅利商品編號有誤或空白',
         'G0' => '系統功能有誤',
-        'G1' => '交易異常',
+        'G1' => '交易逾時',
         'G2' => '資料格式錯誤',
         'G3' => '非使用中特店',
         'G4' => '特店交易類型不合',
@@ -79,8 +68,21 @@ class Api
         'GL' => '非限定特店，不可使用「玉山卡」參數',
         'GM' => '限定特店，必須傳送「玉山卡」參數',
         'GN' => '該卡號非玉山卡所屬',
-        'GS' => '系統暫停服務',
-        'QQ' => '不允許 Debit Card 交易',
+        'XA' => '紅利自付額有誤',
+        'XB' => '紅利商品數量有誤',
+        'XC' => '紅利商品數量超過可折抵上限',
+        'XD' => '紅利商品折抵點數超過最高折',
+        'XE' => '紅利商品傳入之固定點數有誤',
+        'X1' => '不允許使用紅利折抵現金功能',
+        'X2' => '點數未達可折抵點數下限',
+        'X3' => '他行卡不支援紅利折抵',
+        'X4' => '此活動已逾期',
+        'X5' => '金額未超過限額不允許使用',
+        'X6' => '特店不允許紅利交易',
+        'X7' => '點數不足',
+        'X8' => '非正卡持卡人',
+        'X9' => '紅利商品編號有誤或空白',
+        'TG' => '風險卡管制',
     ];
 
     /**
@@ -124,42 +126,29 @@ class Api
      */
     public function getApiEndpoint()
     {
-        if ($this->options['sandbox'] === false) {
-            return $this->options['desktop'] === true ?
-                'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
-                'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
-        } else {
-            return $this->options['desktop'] === true ?
-                'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
-                'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
-        }
+        return $this->options['sandbox'] ?
+            'https://acqtest.esunbank.com.tw/acq_online/online/sale47.htm' :
+            'https://acq.esunbank.com.tw/acq_online/online/sale47.htm';
     }
 
     /**
-     * prepare.
+     * preparePayment.
      *
      * @param array $params
      * @param mixed $request
      *
      * @return array
      */
-    public function prepare(array $params, $request)
+    public function preparePayment(array $params, $request)
     {
         $supportedParams = [
-            // 特店代碼
             'MID' => $this->options['MID'],
-            // 終端機代號, EC000001(一般交易) EC000002(分期)
-            'TID' => 'EC000001',
-            // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
+            'CID' => '',
+            'TID' => $this->options['TID'],
             'ONO' => '',
-            // 交易金額, 台幣(901)
             'TA'  => '',
-            // 回覆位址, 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp',
             'U'   => $this->getRedirectUrl($request),
-            // 分期代碼, 三期：0100103  六期：0100106 正式環境參數由業務經辦提供
             'IC'  => '',
-            // 銀行紅利折抵, Y：使用銀行紅利交易。 N：不使用銀行紅利交易。
-            'BPF' => 'N',
         ];
 
         $params = array_replace(
@@ -167,13 +156,11 @@ class Api
             array_intersect_key($params, $supportedParams)
         );
 
-        $params = json_encode($params);
-
-        return [
-            'data' => $params,
-            'mac'  => hash('sha256', $params.$this->options['M']),
-            'ksn'  => 1,
-        ];
+        return array_merge([
+            'M' => md5(implode('&', array_merge($params, [
+                $this->options['M'],
+            ]))),
+        ], $params);
     }
 
     /**
