@@ -137,7 +137,7 @@ class Api
             // 交易金額, 台幣(901)
             'TA'  => '',
             // 回覆位址, 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp',
-            'U'   => $this->getRedirectUrl($request),
+            'U'   => $request->getToken()->getTargetUrl(),
             // 分期代碼, 三期：0100103  六期：0100106 正式環境參數由業務經辦提供
             'IC'  => '',
             // 銀行紅利折抵, Y：使用銀行紅利交易。 N：不使用銀行紅利交易。
@@ -172,20 +172,6 @@ class Api
         }
 
         return hash('sha256', $params.$this->options['M']);
-    }
-
-    /**
-     * getRedirectUrl.
-     *
-     * @param mixed $request
-     *
-     * @return string
-     */
-    protected function getRedirectUrl($request)
-    {
-        $scheme = parse_url($request->getToken()->getTargetUrl());
-
-        return sprintf('%s://%s%s', $scheme['scheme'], $scheme['host'], $scheme['path']);
     }
 
     /**
