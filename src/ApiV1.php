@@ -1,6 +1,6 @@
 <?php
 
-namespace PayumTw\Esunbank;
+namespace PayumTW\Esunbank;
 
 use Http\Message\MessageFactory;
 use Payum\Core\Exception\Http\HttpException;
