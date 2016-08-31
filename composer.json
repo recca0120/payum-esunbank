@@ -28,6 +28,9 @@
         "mobiledetect/mobiledetectlib": "^2.8"
     },
     "require-dev": {
+        "mockery/mockery": "~0.9.4",
+        "phpunit/phpunit": "~5.4",
+        "nesbot/carbon": "~1.20",
         "payum/core": "~1.0@dev",
         "php-http/guzzle6-adapter": "^1.0"
     },
