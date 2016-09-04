@@ -2,7 +2,6 @@
 
 namespace PayumTW\Esunbank;
 
-use Detection\MobileDetect;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayFactory;
 use PayumTW\Esunbank\Action\CaptureAction;
@@ -26,9 +25,9 @@ class EsunbankGatewayFactory extends GatewayFactory
 
         if (false == $config['payum.api']) {
             $config['payum.default_options'] = [
-                'MID'     => '',
-                'M'       => '',
-                'desktop' => $this->isDesktop(),
+                'MID'     => '8089000016',
+                'M'       => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+                'mobile'  => null,
                 'sandbox' => true,
             ];
 
@@ -41,17 +40,5 @@ class EsunbankGatewayFactory extends GatewayFactory
                 return new Api((array) $config, $config['payum.http_client'], $config['httplug.message_factory']);
             };
         }
-    }
-
-    /**
-     * isDesktop.
-     *
-     * @return bool [description]
-     */
-    protected function isDesktop()
-    {
-        $detect = new MobileDetect();
-
-        return $detect->isMobile() === false && $detect->isTablet() === false;
     }
 }

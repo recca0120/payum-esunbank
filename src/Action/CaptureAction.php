@@ -44,12 +44,20 @@ class CaptureAction extends GatewayAwareAction implements ApiAwareInterface
 
         $httpRequest = new GetHttpRequest();
         $this->gateway->execute($httpRequest);
-        if (isset($httpRequest->query['DATA']) === true) {
-            $model->replace($this->api->parseResult($httpRequest->query['DATA']));
+
+        if (isset($httpRequest->request['DATA']) === true) {
+            $model->replace($this->api->parseResult($httpRequest->request));
         } else {
+            $token = $request->getToken();
+            $targetUrl = $token->getTargetUrl();
+
+            if (empty($model['U']) === true) {
+                $model['U'] = $targetUrl;
+            }
+
             throw new HttpPostRedirect(
                 $this->api->getApiEndpoint(),
-                $this->api->prepare($model->toUnsafeArray(), $request)
+                $this->api->preparePayment($model->toUnsafeArray())
             );
         }
     }

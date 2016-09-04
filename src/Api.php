@@ -1,9 +1,9 @@
 <?php
 
-namespace PayumTw\Esunbank;
+namespace PayumTW\Esunbank;
 
+use Detection\MobileDetect;
 use Http\Message\MessageFactory;
-use Payum\Core\Exception\Http\HttpException;
 use Payum\Core\HttpClientInterface;
 
 class Api
@@ -98,26 +98,6 @@ class Api
     }
 
     /**
-     * @param array $fields
-     *
-     * @return array
-     */
-    protected function doRequest($method, array $fields)
-    {
-        $headers = [];
-
-        $request = $this->messageFactory->createRequest($method, $this->getApiEndpoint(), $headers, http_build_query($fields));
-
-        $response = $this->client->send($request);
-
-        if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
-            throw HttpException::factory($request, $response);
-        }
-
-        return $response;
-    }
-
-    /**
      * getApiEndpoint.
      *
      * @return string
@@ -125,11 +105,11 @@ class Api
     public function getApiEndpoint()
     {
         if ($this->options['sandbox'] === false) {
-            return $this->options['desktop'] === true ?
+            return $this->isMobile() === false ?
                 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
                 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
         } else {
-            return $this->options['desktop'] === true ?
+            return $this->isMobile() === false ?
                 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
                 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
         }
@@ -139,27 +119,26 @@ class Api
      * prepare.
      *
      * @param array $params
-     * @param mixed $request
      *
      * @return array
      */
-    public function prepare(array $params, $request)
+    public function preparePayment(array $params)
     {
         $supportedParams = [
-            // 特店代碼
-            'MID' => $this->options['MID'],
-            // 終端機代號, EC000001(一般交易) EC000002(分期)
-            'TID' => 'EC000001',
             // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
             'ONO' => '',
-            // 交易金額, 台幣(901)
-            'TA'  => '',
             // 回覆位址, 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp',
-            'U'   => $this->getRedirectUrl($request),
-            // 分期代碼, 三期：0100103  六期：0100106 正式環境參數由業務經辦提供
-            'IC'  => '',
+            'U' => 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp',
+            // 特店代碼
+            'MID' => $this->options['MID'],
             // 銀行紅利折抵, Y：使用銀行紅利交易。 N：不使用銀行紅利交易。
             'BPF' => 'N',
+            // 分期代碼, 三期：0100103  六期：0100106 正式環境參數由業務經辦提供
+            'IC' => '',
+            // 交易金額, 台幣(901)
+            'TA' => '',
+            // 終端機代號, EC000001(一般交易) EC000002(分期)
+            'TID' => 'EC000001',
         ];
 
         $params = array_replace(
@@ -167,43 +146,90 @@ class Api
             array_intersect_key($params, $supportedParams)
         );
 
-        $params = json_encode($params);
+        if (empty($params['IC']) === true) {
+            unset($params['IC']);
+        }
 
+        $params['BPF'] = strtoupper($params['BPF']);
+        if ($params['BPF'] === 'N') {
+            unset($params['BPF']);
+        }
+
+        return $this->prepareRequestData($params);
+    }
+
+    /**
+     * prepareRequestData.
+     *
+     * @method prepareRequestData
+     *
+     * @param array $params
+     * @param int   $option
+     *
+     * @return array
+     */
+    protected function prepareRequestData($params, $option = JSON_UNESCAPED_SLASHES)
+    {
         return [
-            'data' => $params,
-            'mac'  => hash('sha256', $params.$this->options['M']),
+            'data' => json_encode($params, $option),
+            'mac'  => $this->calculateHash($params, $option),
             'ksn'  => 1,
         ];
     }
 
     /**
-     * getRedirectUrl.
-     *
-     * @param mixed $request
+     * @param array $params
      *
      * @return string
      */
-    public function getRedirectUrl($request)
+    public function calculateHash($params, $option = JSON_UNESCAPED_SLASHES)
     {
-        $scheme = parse_url($request->getToken()->getTargetUrl());
+        if (is_array($params) === true) {
+            $params = json_encode($params, $option);
+        }
 
-        return sprintf('%s://%s%s', $scheme['scheme'], $scheme['host'], $scheme['path']);
+        return hash('sha256', $params.$this->options['M']);
+    }
+
+    /**
+     * verifyHash.
+     *
+     * @method verifyHash
+     *
+     * @param array $params
+     *
+     * @return bool
+     */
+    protected function verifyHash($params)
+    {
+        return true;
+
+        $result = false;
+        if ($params['MACD'] === $this->calculateHash($params['DATA'])) {
+            $result = true;
+        }
+
+        return $result;
     }
 
     /**
      * parseResult.
      *
-     * @param mixed $result
+     * @param mixed $params
      *
      * @return array
      */
-    public function parseResult($result)
+    public function parseResult($params)
     {
-        $data = [];
-        parse_str(str_replace(',', '&', $result), $data);
-        $data['statusReason'] = $this->getStatusReason($data['RC']);
+        $result = [];
+        parse_str(str_replace(',', '&', $params['DATA']), $result);
+        $result = array_merge($params, $result);
+        if ($this->verifyHash($params) === false) {
+            $result['RC'] = 'GF';
+        }
+        $result['statusReason'] = $this->getStatusReason($result['RC']);
 
-        return $data;
+        return $result;
     }
 
     /**
@@ -221,5 +247,21 @@ class Api
         }
 
         return $statusReason;
+    }
+
+    /**
+     * isMobile.
+     *
+     * @return bool
+     */
+    protected function isMobile()
+    {
+        if (isset($this->options['mobile']) === true && is_null($this->options['mobile']) === false) {
+            return $this->options['mobile'];
+        }
+
+        $detect = new MobileDetect();
+
+        return ($detect->isMobile() === false && $detect->isTablet() === false) ? false : true;
     }
 }
