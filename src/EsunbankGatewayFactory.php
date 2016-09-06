@@ -16,18 +16,18 @@ class EsunbankGatewayFactory extends GatewayFactory
     protected function populateConfig(ArrayObject $config)
     {
         $config->defaults([
-            'payum.factory_name'           => 'esunbank',
-            'payum.factory_title'          => 'Esunbank',
-            'payum.action.capture'         => new CaptureAction(),
-            'payum.action.status'          => new StatusAction(),
+            'payum.factory_name' => 'esunbank',
+            'payum.factory_title' => 'Esunbank',
+            'payum.action.capture' => new CaptureAction(),
+            'payum.action.status' => new StatusAction(),
             'payum.action.convert_payment' => new ConvertPaymentAction(),
         ]);
 
         if (false == $config['payum.api']) {
             $config['payum.default_options'] = [
-                'MID'     => '8089000016',
-                'M'       => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-                'mobile'  => null,
+                'MID' => '8089000016',
+                'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+                'mobile' => null,
                 'sandbox' => true,
             ];
 

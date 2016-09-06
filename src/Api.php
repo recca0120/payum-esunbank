@@ -172,8 +172,8 @@ class Api
     {
         return [
             'data' => json_encode($params, $option),
-            'mac'  => $this->calculateHash($params, $option),
-            'ksn'  => 1,
+            'mac' => $this->calculateHash($params, $option),
+            'ksn' => 1,
         ];
     }
 

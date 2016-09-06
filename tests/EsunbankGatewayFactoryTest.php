@@ -39,13 +39,13 @@ class EsunbankGatewayFactoryTest extends PHPUnit_Framework_TestCase
 
         $gateway = new EsunbankGatewayFactory();
         $config = $gateway->createConfig([
-            'payum.api'               => false,
-            'payum.required_options'  => [],
-            'payum.http_client'       => $httpClient,
+            'payum.api' => false,
+            'payum.required_options' => [],
+            'payum.http_client' => $httpClient,
             'httplug.message_factory' => $message,
-            'MID'                     => '8089000016',
-            'M'                       => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-            'sandbox'                 => true,
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
         ]);
 
         $api = call_user_func($config['payum.api'], ArrayObject::ensureArrayObject($config));

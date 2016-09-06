@@ -146,9 +146,9 @@ class ApiV1
             'CID' => '',
             'TID' => $this->options['TID'],
             'ONO' => '',
-            'TA'  => '',
-            'U'   => $this->getRedirectUrl($request),
-            'IC'  => '',
+            'TA' => '',
+            'U' => $this->getRedirectUrl($request),
+            'IC' => '',
         ];
 
         $params = array_replace(
