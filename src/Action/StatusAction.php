@@ -18,15 +18,15 @@ class StatusAction implements ActionInterface
     {
         RequestNotSupportedException::assertSupports($this, $request);
 
-        $model = ArrayObject::ensureArrayObject($request->getModel());
+        $details = ArrayObject::ensureArrayObject($request->getModel());
 
-        if (isset($model['RC']) === false) {
+        if (isset($details['RC']) === false) {
             $request->markNew();
 
             return;
         }
 
-        if ($model['RC'] === '00') {
+        if ($details['RC'] === '00') {
             $request->markCaptured();
 
             return;

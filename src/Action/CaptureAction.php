@@ -41,24 +41,24 @@ class CaptureAction implements ActionInterface, ApiAwareInterface, GatewayAwareI
     {
         RequestNotSupportedException::assertSupports($this, $request);
 
-        $model = ArrayObject::ensureArrayObject($request->getModel());
+        $details = ArrayObject::ensureArrayObject($request->getModel());
 
         $httpRequest = new GetHttpRequest();
         $this->gateway->execute($httpRequest);
 
         if (isset($httpRequest->request['DATA']) === true) {
-            $model->replace($this->api->parseResult($httpRequest->request));
+            $details->replace($this->api->parseResult($httpRequest->request));
         } else {
             $token = $request->getToken();
             $targetUrl = $token->getTargetUrl();
 
-            if (empty($model['U']) === true) {
-                $model['U'] = $targetUrl;
+            if (empty($details['U']) === true) {
+                $details['U'] = $targetUrl;
             }
 
             throw new HttpPostRedirect(
                 $this->api->getApiEndpoint(),
-                $this->api->preparePayment($model->toUnsafeArray())
+                $this->api->preparePayment($details->toUnsafeArray())
             );
         }
     }
