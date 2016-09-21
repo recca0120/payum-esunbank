@@ -11,21 +11,19 @@ use Payum\Core\Exception\UnsupportedApiException;
 use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
 use Payum\Core\Reply\HttpPostRedirect;
-use Payum\Core\Request\Capture;
 use Payum\Core\Request\Sync;
 use Payum\Core\Request\GetHttpRequest;
 use PayumTW\Esunbank\Api;
-use PayumTW\Esunbank\Request\Api\CreateTransaction;
+use PayumTW\Esunbank\Request\Api\GetTransactionData;
 
-
-class CaptureAction implements ActionInterface, GatewayAwareInterface
+class SyncAction implements ActionInterface, GatewayAwareInterface
 {
     use GatewayAwareTrait;
 
     /**
      * {@inheritdoc}
      *
-     * @param Capture $request
+     * @param Refund $request
      */
     public function execute($request)
     {
@@ -33,25 +31,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
 
         $details = ArrayObject::ensureArrayObject($request->getModel());
 
-        $httpRequest = new GetHttpRequest();
-        $this->gateway->execute($httpRequest);
-
-        if (isset($httpRequest->request['DATA']) === true) {
-            $details->replace($httpRequest->request);
-
-            $this->gateway->execute(new Sync($details));
-
-            return;
-        }
-
-        $token = $request->getToken();
-        $targetUrl = $token->getTargetUrl();
-
-        if (empty($details['U']) === true) {
-            $details['U'] = $targetUrl;
-        }
-
-        $this->gateway->execute(new CreateTransaction($details));
+        $this->gateway->execute(new GetTransactionData($details));
     }
 
     /**
@@ -60,7 +40,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
     public function supports($request)
     {
         return
-            $request instanceof Capture &&
+            $request instanceof Sync &&
             $request->getModel() instanceof \ArrayAccess;
     }
 }

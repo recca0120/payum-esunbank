@@ -5,8 +5,12 @@ namespace PayumTW\Esunbank;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayFactory;
 use PayumTW\Esunbank\Action\CaptureAction;
+use PayumTW\Esunbank\Action\RefundAction;
 use PayumTW\Esunbank\Action\ConvertPaymentAction;
+use PayumTW\Esunbank\Action\SyncAction;
 use PayumTW\Esunbank\Action\StatusAction;
+use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
+use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
 
 class EsunbankGatewayFactory extends GatewayFactory
 {
@@ -20,7 +24,12 @@ class EsunbankGatewayFactory extends GatewayFactory
             'payum.factory_title' => 'Esunbank',
             'payum.action.capture' => new CaptureAction(),
             'payum.action.status' => new StatusAction(),
+            'payum.action.sync' => new SyncAction(),
+            'payum.action.refund' => new RefundAction(),
             'payum.action.convert_payment' => new ConvertPaymentAction(),
+
+            'payum.action.api.create_transaction' => new CreateTransactionAction(),
+            'payum.action.api.get_transaction_data' => new GetTransactionDataAction(),
         ]);
 
         if (false == $config['payum.api']) {

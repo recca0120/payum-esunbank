@@ -5,6 +5,8 @@ namespace PayumTW\Esunbank;
 use Detection\MobileDetect;
 use Http\Message\MessageFactory;
 use Payum\Core\HttpClientInterface;
+use Payum\Core\Exception\Http\HttpException;
+use LogicException;
 
 class Api
 {
@@ -98,31 +100,64 @@ class Api
     }
 
     /**
+     * @param array $fields
+     *
+     * @return array
+     */
+    protected function doRequest(array $fields, $type = 'sync')
+    {
+        $headers = [
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ];
+
+        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type), $headers, http_build_query($fields));
+
+        $response = $this->client->send($request);
+
+        if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
+            throw HttpException::factory($request, $response);
+        }
+
+        $details = [];
+        parse_str($response->getBody()->getContents(), $details);
+
+        if (empty($details['DATA']) === true) {
+            throw new LogicException("Response content is not valid");
+        }
+
+        return $details;
+    }
+
+    /**
      * getApiEndpoint.
      *
      * @return string
      */
-    public function getApiEndpoint()
+    public function getApiEndpoint($type = 'capture')
     {
         if ($this->options['sandbox'] === false) {
-            return $this->isMobile() === false ?
-                'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
-                'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
+            $urls = [
+                'capture' => $this->isMobile()===false?'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s':'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m',
+                'sync' => 'https://acq.esunbank.com.tw/ACQQuery/esuncard/txnf0180',
+            ];
         } else {
-            return $this->isMobile() === false ?
-                'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s' :
-                'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m';
+            $urls = [
+                'capture' => $this->isMobile()===false?'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s':'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m',
+                'sync' => 'https://acqtest.esunbank.com.tw/ACQQuery/esuncard/txnf0180',
+            ];
         }
+
+        return $urls[$type];
     }
 
     /**
-     * prepare.
+     * createTransaction.
      *
      * @param array $params
      *
      * @return array
      */
-    public function preparePayment(array $params)
+    public function createTransaction(array $params)
     {
         $supportedParams = [
             // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
@@ -156,6 +191,47 @@ class Api
         }
 
         return $this->prepareRequestData($params);
+    }
+
+    /**
+     * getTransactionData.
+     *
+     * @param mixed $params
+     *
+     * @return array
+     */
+    public function getTransactionData($params)
+    {
+        $details = [];
+
+        if (isset($params['DATA']) === true) {
+            parse_str(str_replace(',', '&', $params['DATA']), $details);
+            $details = array_merge($params, $details);
+            if ($this->verifyHash($params) === false) {
+                $details['RC'] = 'GF';
+            }
+        } else {
+            $supportedParams = [
+                // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
+                'ONO' => '',
+                // 特店代碼
+                'MID' => $this->options['MID'],
+            ];
+
+            $params = array_replace(
+                $supportedParams,
+                array_intersect_key($params, $supportedParams)
+            );
+
+            $response = $this->doRequest($this->prepareRequestData($params), 'sync');
+            $data = json_decode($response['DATA'], true);
+
+            $details = $data['txnData'];
+        };
+
+        $details['statusReason'] = $this->getStatusReason($details['RC']);
+
+        return $details;
     }
 
     /**
@@ -208,26 +284,6 @@ class Api
         if ($params['MACD'] === $this->calculateHash($params['DATA'])) {
             $result = true;
         }
-
-        return $result;
-    }
-
-    /**
-     * parseResult.
-     *
-     * @param mixed $params
-     *
-     * @return array
-     */
-    public function parseResult($params)
-    {
-        $result = [];
-        parse_str(str_replace(',', '&', $params['DATA']), $result);
-        $result = array_merge($params, $result);
-        if ($this->verifyHash($params) === false) {
-            $result['RC'] = 'GF';
-        }
-        $result['statusReason'] = $this->getStatusReason($result['RC']);
 
         return $result;
     }

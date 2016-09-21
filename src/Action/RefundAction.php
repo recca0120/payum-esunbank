@@ -11,47 +11,24 @@ use Payum\Core\Exception\UnsupportedApiException;
 use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
 use Payum\Core\Reply\HttpPostRedirect;
-use Payum\Core\Request\Capture;
-use Payum\Core\Request\Sync;
+use Payum\Core\Request\Refund;
 use Payum\Core\Request\GetHttpRequest;
 use PayumTW\Esunbank\Api;
-use PayumTW\Esunbank\Request\Api\CreateTransaction;
 
-
-class CaptureAction implements ActionInterface, GatewayAwareInterface
+class RefundAction implements ActionInterface, GatewayAwareInterface
 {
     use GatewayAwareTrait;
 
     /**
      * {@inheritdoc}
      *
-     * @param Capture $request
+     * @param Refund $request
      */
     public function execute($request)
     {
         RequestNotSupportedException::assertSupports($this, $request);
 
         $details = ArrayObject::ensureArrayObject($request->getModel());
-
-        $httpRequest = new GetHttpRequest();
-        $this->gateway->execute($httpRequest);
-
-        if (isset($httpRequest->request['DATA']) === true) {
-            $details->replace($httpRequest->request);
-
-            $this->gateway->execute(new Sync($details));
-
-            return;
-        }
-
-        $token = $request->getToken();
-        $targetUrl = $token->getTargetUrl();
-
-        if (empty($details['U']) === true) {
-            $details['U'] = $targetUrl;
-        }
-
-        $this->gateway->execute(new CreateTransaction($details));
     }
 
     /**
@@ -60,7 +37,7 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
     public function supports($request)
     {
         return
-            $request instanceof Capture &&
+            $request instanceof Refund &&
             $request->getModel() instanceof \ArrayAccess;
     }
 }
