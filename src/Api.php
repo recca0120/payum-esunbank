@@ -122,7 +122,7 @@ class Api
         parse_str($response->getBody()->getContents(), $details);
 
         if (empty($details['DATA']) === true) {
-            throw new LogicException("Response content is not valid");
+            throw new LogicException('Response content is not valid');
         }
 
         return $details;
@@ -137,12 +137,16 @@ class Api
     {
         if ($this->options['sandbox'] === false) {
             $urls = [
-                'capture' => $this->isMobile()===false?'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s':'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m',
+                'capture' => $this->isMobile() === false ? 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s' : 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m',
+                'cancel' => 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf0150',
+                'refund' => 'https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf0160',
                 'sync' => 'https://acq.esunbank.com.tw/ACQQuery/esuncard/txnf0180',
             ];
         } else {
             $urls = [
-                'capture' => $this->isMobile()===false?'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s':'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m',
+                'capture' => $this->isMobile() === false ? 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s' : 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m',
+                'cancel' => 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf0150',
+                'refund' => 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf0160',
                 'sync' => 'https://acqtest.esunbank.com.tw/ACQQuery/esuncard/txnf0180',
             ];
         }
@@ -200,16 +204,20 @@ class Api
      *
      * @return array
      */
-    public function getTransactionData($params)
+    public function getTransactionData(array $params)
     {
         $details = [];
 
         if (isset($params['DATA']) === true) {
             parse_str(str_replace(',', '&', $params['DATA']), $details);
-            $details = array_merge($params, $details);
+            $params = array_merge($params, $details);
             if ($this->verifyHash($params) === false) {
-                $details['RC'] = 'GF';
+                $params['RC'] = 'GF';
             }
+        }
+
+        if (isset($params['RC']) === true) {
+            $details = $params;
         } else {
             $supportedParams = [
                 // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
@@ -227,9 +235,55 @@ class Api
             $data = json_decode($response['DATA'], true);
 
             $details = $data['txnData'];
-        };
+        }
 
         $details['statusReason'] = $this->getStatusReason($details['RC']);
+
+        return $details;
+    }
+
+    public function refundTransaction(array $params)
+    {
+        $supportedParams = [
+            // 05 : 授權 51 : 取消授權 71 : 退貨授權
+            'TYP' => '71',
+            // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
+            'ONO' => '',
+            // 特店代碼
+            'MID' => $this->options['MID'],
+        ];
+
+        $params = array_replace(
+            $supportedParams,
+            array_intersect_key($params, $supportedParams)
+        );
+
+        $response = $this->doRequest($this->prepareRequestData($params), 'refund');
+        $data = json_decode($response['DATA'], true);
+
+        $details = $data['txnData'];
+
+        return $details;
+    }
+
+    public function cancelTransaction(array $params)
+    {
+        $supportedParams = [
+            // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
+            'ONO' => '',
+            // 特店代碼
+            'MID' => $this->options['MID'],
+        ];
+
+        $params = array_replace(
+            $supportedParams,
+            array_intersect_key($params, $supportedParams)
+        );
+
+        $response = $this->doRequest($this->prepareRequestData($params), 'cancel');
+        $data = json_decode($response['DATA'], true);
+
+        $details = $data['txnData'];
 
         return $details;
     }

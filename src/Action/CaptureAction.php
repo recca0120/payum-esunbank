@@ -3,20 +3,14 @@
 namespace PayumTW\Esunbank\Action;
 
 use Payum\Core\Action\ActionInterface;
-use Payum\Core\ApiAwareInterface;
-use Payum\Core\ApiAwareTrait;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
-use Payum\Core\Exception\UnsupportedApiException;
 use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
-use Payum\Core\Reply\HttpPostRedirect;
 use Payum\Core\Request\Capture;
 use Payum\Core\Request\Sync;
 use Payum\Core\Request\GetHttpRequest;
-use PayumTW\Esunbank\Api;
 use PayumTW\Esunbank\Request\Api\CreateTransaction;
-
 
 class CaptureAction implements ActionInterface, GatewayAwareInterface
 {

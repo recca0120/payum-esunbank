@@ -1,23 +1,17 @@
 <?php
 
-namespace PayumTW\Esunbank\Action;
+namespace PayumTW\Esunbank\Action\Api;
 
-use Payum\Core\Action\ActionInterface;
+use PayumTW\Esunbank\Request\Api\CancelTransaction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
-use Payum\Core\GatewayAwareInterface;
-use Payum\Core\GatewayAwareTrait;
-use Payum\Core\Request\Sync;
-use PayumTW\Esunbank\Request\Api\GetTransactionData;
 
-class SyncAction implements ActionInterface, GatewayAwareInterface
+class CancelTransactionAction extends BaseApiAwareAction
 {
-    use GatewayAwareTrait;
-
     /**
      * {@inheritdoc}
      *
-     * @param Refund $request
+     * @param $request RefundTransaction
      */
     public function execute($request)
     {
@@ -25,7 +19,9 @@ class SyncAction implements ActionInterface, GatewayAwareInterface
 
         $details = ArrayObject::ensureArrayObject($request->getModel());
 
-        $this->gateway->execute(new GetTransactionData($details));
+        $details->validateNotEmpty(['ONO']);
+
+        $details->replace($this->api->cancelTransaction((array) $details));
     }
 
     /**
@@ -34,7 +30,7 @@ class SyncAction implements ActionInterface, GatewayAwareInterface
     public function supports($request)
     {
         return
-            $request instanceof Sync &&
+            $request instanceof CancelTransaction &&
             $request->getModel() instanceof \ArrayAccess;
     }
 }

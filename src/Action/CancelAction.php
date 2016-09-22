@@ -7,18 +7,18 @@ use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
 use Payum\Core\GatewayAwareInterface;
 use Payum\Core\GatewayAwareTrait;
-use Payum\Core\Request\Refund;
+use Payum\Core\Request\Cancel;
 use Payum\Core\Request\Sync;
-use PayumTW\Esunbank\Request\Api\RefundTransaction;
+use PayumTW\Esunbank\Request\Api\CancelTransaction;
 
-class RefundAction implements ActionInterface, GatewayAwareInterface
+class CancelAction implements ActionInterface, GatewayAwareInterface
 {
     use GatewayAwareTrait;
 
     /**
      * {@inheritdoc}
      *
-     * @param Refund $request
+     * @param Cancel $request
      */
     public function execute($request)
     {
@@ -26,7 +26,7 @@ class RefundAction implements ActionInterface, GatewayAwareInterface
 
         $details = ArrayObject::ensureArrayObject($request->getModel());
 
-        $this->gateway->execute(new RefundTransaction($details));
+        $this->gateway->execute(new CancelTransaction($details));
 
         $this->gateway->execute(new Sync($details));
     }
@@ -37,7 +37,7 @@ class RefundAction implements ActionInterface, GatewayAwareInterface
     public function supports($request)
     {
         return
-            $request instanceof Refund &&
+            $request instanceof Cancel &&
             $request->getModel() instanceof \ArrayAccess;
     }
 }

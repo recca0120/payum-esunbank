@@ -9,8 +9,11 @@ use PayumTW\Esunbank\Action\RefundAction;
 use PayumTW\Esunbank\Action\ConvertPaymentAction;
 use PayumTW\Esunbank\Action\SyncAction;
 use PayumTW\Esunbank\Action\StatusAction;
+use PayumTW\Esunbank\Action\CancelAction;
 use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
 use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
+use PayumTW\Esunbank\Action\Api\RefundTransactionAction;
+use PayumTW\Esunbank\Action\Api\CancelTransactionAction;
 
 class EsunbankGatewayFactory extends GatewayFactory
 {
@@ -23,12 +26,15 @@ class EsunbankGatewayFactory extends GatewayFactory
             'payum.factory_name' => 'esunbank',
             'payum.factory_title' => 'Esunbank',
             'payum.action.capture' => new CaptureAction(),
-            'payum.action.status' => new StatusAction(),
-            'payum.action.sync' => new SyncAction(),
             'payum.action.refund' => new RefundAction(),
+            'payum.action.cancel' => new CancelAction(),
+            'payum.action.sync' => new SyncAction(),
+            'payum.action.status' => new StatusAction(),
             'payum.action.convert_payment' => new ConvertPaymentAction(),
 
             'payum.action.api.create_transaction' => new CreateTransactionAction(),
+            'payum.action.api.refund_transaction' => new RefundTransactionAction(),
+            'payum.action.api.cancel_transaction' => new CancelTransactionAction(),
             'payum.action.api.get_transaction_data' => new GetTransactionDataAction(),
         ]);
 
