@@ -1,10 +1,10 @@
 <?php
 
 use Mockery as m;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
 use PayumTW\Esunbank\Api;
 use PayumTW\Esunbank\Request\Api\GetTransactionData;
-use Payum\Core\Bridge\Spl\ArrayObject;
 
 class GetTransactionDataActionTest extends PHPUnit_Framework_TestCase
 {

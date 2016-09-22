@@ -2,10 +2,10 @@
 
 namespace PayumTW\Esunbank\Action\Api;
 
-use PayumTW\Esunbank\Request\Api\CreateTransaction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
 use Payum\Core\Reply\HttpPostRedirect;
+use PayumTW\Esunbank\Request\Api\CreateTransaction;
 
 class CreateTransactionAction extends BaseApiAwareAction
 {

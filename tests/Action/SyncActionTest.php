@@ -2,9 +2,9 @@
 
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
-use PayumTW\Esunbank\Action\SyncAction;
 use Payum\Core\GatewayInterface;
 use Payum\Core\Request\Sync;
+use PayumTW\Esunbank\Action\SyncAction;
 use PayumTW\Esunbank\Request\Api\GetTransactionData;
 
 class SyncActionTest extends PHPUnit_Framework_TestCase

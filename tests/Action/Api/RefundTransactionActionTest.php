@@ -1,10 +1,10 @@
 <?php
 
 use Mockery as m;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\Api\RefundTransactionAction;
 use PayumTW\Esunbank\Api;
 use PayumTW\Esunbank\Request\Api\RefundTransaction;
-use Payum\Core\Bridge\Spl\ArrayObject;
 
 class RefundTransactionActionTest extends PHPUnit_Framework_TestCase
 {

@@ -1,10 +1,10 @@
 <?php
 
 use Mockery as m;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\Api\CancelTransactionAction;
 use PayumTW\Esunbank\Api;
 use PayumTW\Esunbank\Request\Api\CancelTransaction;
-use Payum\Core\Bridge\Spl\ArrayObject;
 
 class CancelTransactionActionTest extends PHPUnit_Framework_TestCase
 {

@@ -4,16 +4,16 @@ namespace PayumTW\Esunbank;
 
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayFactory;
-use PayumTW\Esunbank\Action\CaptureAction;
-use PayumTW\Esunbank\Action\RefundAction;
-use PayumTW\Esunbank\Action\ConvertPaymentAction;
-use PayumTW\Esunbank\Action\SyncAction;
-use PayumTW\Esunbank\Action\StatusAction;
-use PayumTW\Esunbank\Action\CancelAction;
+use PayumTW\Esunbank\Action\Api\CancelTransactionAction;
 use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
 use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
 use PayumTW\Esunbank\Action\Api\RefundTransactionAction;
-use PayumTW\Esunbank\Action\Api\CancelTransactionAction;
+use PayumTW\Esunbank\Action\CancelAction;
+use PayumTW\Esunbank\Action\CaptureAction;
+use PayumTW\Esunbank\Action\ConvertPaymentAction;
+use PayumTW\Esunbank\Action\RefundAction;
+use PayumTW\Esunbank\Action\StatusAction;
+use PayumTW\Esunbank\Action\SyncAction;
 
 class EsunbankGatewayFactory extends GatewayFactory
 {

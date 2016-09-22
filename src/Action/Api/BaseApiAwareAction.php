@@ -2,10 +2,10 @@
 
 namespace PayumTW\Esunbank\Action\Api;
 
-use PayumTW\Esunbank\Api;
 use Payum\Core\Action\ActionInterface;
 use Payum\Core\ApiAwareInterface;
 use Payum\Core\Exception\UnsupportedApiException;
+use PayumTW\Esunbank\Api;
 
 abstract class BaseApiAwareAction implements ActionInterface, ApiAwareInterface
 {

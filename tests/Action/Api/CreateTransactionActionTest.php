@@ -1,11 +1,11 @@
 <?php
 
 use Mockery as m;
+use Payum\Core\Bridge\Spl\ArrayObject;
+use Payum\Core\Reply\HttpResponse;
 use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
 use PayumTW\Esunbank\Api;
-use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Request\Api\CreateTransaction;
-use Payum\Core\Reply\HttpResponse;
 
 class CreateTransactionActionTest extends PHPUnit_Framework_TestCase
 {

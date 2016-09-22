@@ -2,10 +2,10 @@
 
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
-use PayumTW\Esunbank\Action\CancelAction;
 use Payum\Core\GatewayInterface;
-use Payum\Core\Request\Sync;
 use Payum\Core\Request\Cancel;
+use Payum\Core\Request\Sync;
+use PayumTW\Esunbank\Action\CancelAction;
 use PayumTW\Esunbank\Request\Api\CancelTransaction;
 
 class CancelActionTest extends PHPUnit_Framework_TestCase

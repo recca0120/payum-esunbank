@@ -4,9 +4,9 @@ namespace PayumTW\Esunbank;
 
 use Detection\MobileDetect;
 use Http\Message\MessageFactory;
-use Payum\Core\HttpClientInterface;
-use Payum\Core\Exception\Http\HttpException;
 use LogicException;
+use Payum\Core\Exception\Http\HttpException;
+use Payum\Core\HttpClientInterface;
 
 class Api
 {

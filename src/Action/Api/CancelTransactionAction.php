@@ -2,9 +2,9 @@
 
 namespace PayumTW\Esunbank\Action\Api;
 
-use PayumTW\Esunbank\Request\Api\CancelTransaction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
+use PayumTW\Esunbank\Request\Api\CancelTransaction;
 
 class CancelTransactionAction extends BaseApiAwareAction
 {

@@ -2,10 +2,10 @@
 
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
-use PayumTW\Esunbank\Action\RefundAction;
 use Payum\Core\GatewayInterface;
-use Payum\Core\Request\Sync;
 use Payum\Core\Request\Refund;
+use Payum\Core\Request\Sync;
+use PayumTW\Esunbank\Action\RefundAction;
 use PayumTW\Esunbank\Request\Api\RefundTransaction;
 
 class RefundActionTest extends PHPUnit_Framework_TestCase
