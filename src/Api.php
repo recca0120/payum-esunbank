@@ -208,16 +208,12 @@ class Api
     {
         $details = [];
 
-        if (isset($params['DATA']) === true) {
-            parse_str(str_replace(',', '&', $params['DATA']), $details);
-            $params = array_merge($params, $details);
-            if ($this->verifyHash($params) === false) {
-                $params['RC'] = 'GF';
-            }
-        }
+        if (empty($params['response']) === false) {
+            parse_str(str_replace(',', '&', $params['response']['DATA']), $details);
 
-        if (isset($params['RC']) === true) {
-            $details = $params;
+            if ($this->verifyHash($params['response']['MACD'], $details) === false) {
+                $details['RC'] = 'GF';
+            }
         } else {
             $supportedParams = [
                 // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
@@ -233,7 +229,6 @@ class Api
 
             $response = $this->doRequest($this->prepareRequestData($params), 'sync');
             $data = json_decode($response['DATA'], true);
-
             $details = $data['txnData'];
         }
 
