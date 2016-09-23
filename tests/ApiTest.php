@@ -212,4 +212,40 @@ class ApiTest extends PHPUnit_Framework_TestCase
         $api = new Api($options, $httpClient, $message);
         $this->assertSame('https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m', $api->getApiEndpoint());
     }
+
+    public function test_refund_transaction()
+    {
+        /*
+        |------------------------------------------------------------
+        | Set
+        |------------------------------------------------------------
+        */
+
+        $httpClient = m::mock(HttpClientInterface::class);
+        $message = m::mock(MessageFactory::class);
+        $request = m::mock(stdClass::class);
+
+        /*
+        |------------------------------------------------------------
+        | Expectation
+        |------------------------------------------------------------
+        */
+
+        /*
+        |------------------------------------------------------------
+        | Assertion
+        |------------------------------------------------------------
+        */
+
+        $options = [
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+        ];
+        $api = new Api($options, $httpClient, $message);
+
+        $this->assertSame(hash('sha256', '{"TYP":"05","ONO":"1452836854182","MID":"8089000016"}WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B'), $api->calculateHash([
+            'TYP' => '05',
+            'ONO' => '1452836854182',
+            'MID' => '8089000016',
+        ]));
+    }
 }

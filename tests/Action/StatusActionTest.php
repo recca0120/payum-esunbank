@@ -55,7 +55,9 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         $request = m::mock(GetStatusInterface::class);
         $model = new ArrayObject([
             'RC' => '00',
-            'MACD' => 'foo',
+            'response' => [
+                'MACD' => 'foo',
+            ],
         ]);
 
         /*

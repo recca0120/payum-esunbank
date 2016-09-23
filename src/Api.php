@@ -211,7 +211,7 @@ class Api
         if (empty($params['response']) === false) {
             parse_str(str_replace(',', '&', $params['response']['DATA']), $details);
 
-            if ($this->verifyHash($params['response']['MACD'], $details) === false) {
+            if ($details['RC'] === '00' && $this->verifyHash($params['response']['MACD'], $details) === false) {
                 $details['RC'] = 'GF';
             }
         } else {
@@ -222,14 +222,17 @@ class Api
                 'MID' => $this->options['MID'],
             ];
 
-            $params = array_replace(
+            $data = array_replace(
                 $supportedParams,
                 array_intersect_key($params, $supportedParams)
             );
 
-            $response = $this->doRequest($this->prepareRequestData($params), 'sync');
-            $data = json_decode($response['DATA'], true);
-            $details = $data['txnData'];
+            $data['ONO'] = strtoupper($data['ONO']);
+
+            $body = $this->doRequest($this->prepareRequestData($data), 'sync');
+            $response = json_decode($body['DATA'], true);
+            $details = $response['txnData'];
+            $details['response'] = $response;
         }
 
         $details['statusReason'] = $this->getStatusReason($details['RC']);
@@ -239,24 +242,30 @@ class Api
 
     public function refundTransaction(array $params)
     {
+        $details = [];
+
         $supportedParams = [
-            // 05 : 授權 51 : 取消授權 71 : 退貨授權
+            // 05:授權 51:取消授權 71:退貨授權
             'TYP' => '71',
             // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
-            'ONO' => '',
+            'ONO' => null,
             // 特店代碼
             'MID' => $this->options['MID'],
+            // 專案資訊
+            'C' => null,
         ];
 
-        $params = array_replace(
+        $data = array_replace(
             $supportedParams,
             array_intersect_key($params, $supportedParams)
         );
 
-        $response = $this->doRequest($this->prepareRequestData($params), 'refund');
-        $data = json_decode($response['DATA'], true);
+        $data['ONO'] = strtoupper($data['ONO']);
 
-        $details = $data['txnData'];
+        $body = $this->doRequest($this->prepareRequestData($data), 'refund');
+        $response = json_decode($body['DATA'], true);
+        $details = $response['txnData'];
+        $details['response'] = $response;
 
         return $details;
     }
@@ -275,10 +284,14 @@ class Api
             array_intersect_key($params, $supportedParams)
         );
 
-        $response = $this->doRequest($this->prepareRequestData($params), 'cancel');
-        $data = json_decode($response['DATA'], true);
+        $params['ONO'] = strtoupper($params['ONO']);
 
-        $details = $data['txnData'];
+        $data['ONO'] = strtoupper($data['ONO']);
+
+        $body = $this->doRequest($this->prepareRequestData($data), 'cancel');
+        $response = json_decode($body['DATA'], true);
+        $details = $response['txnData'];
+        $details['response'] = $response;
 
         return $details;
     }
@@ -325,12 +338,12 @@ class Api
      *
      * @return bool
      */
-    protected function verifyHash($params)
+    protected function verifyHash($macd, $data)
     {
         return true;
 
         $result = false;
-        if ($params['MACD'] === $this->calculateHash($params['DATA'])) {
+        if ($macd === $this->calculateHash($data)) {
             $result = true;
         }
 
