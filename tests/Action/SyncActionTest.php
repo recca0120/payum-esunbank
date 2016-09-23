@@ -3,6 +3,7 @@
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\GatewayInterface;
+use Payum\Core\Request\GetHttpRequest;
 use Payum\Core\Request\Sync;
 use PayumTW\Esunbank\Action\SyncAction;
 use PayumTW\Esunbank\Request\Api\GetTransactionData;
@@ -26,6 +27,7 @@ class SyncActionTest extends PHPUnit_Framework_TestCase
         $gateway = m::mock(GatewayInterface::class);
         $request = m::mock(Sync::class);
         $details = new ArrayObject();
+        $getHttpRequest = m::mock(GetHttpRequest::class);
 
         /*
         |------------------------------------------------------------
@@ -35,7 +37,9 @@ class SyncActionTest extends PHPUnit_Framework_TestCase
 
         $request->shouldReceive('getModel')->andReturn($details)->twice();
 
-        $gateway->shouldReceive('execute')->with(m::type(GetTransactionData::class));
+        $gateway
+            ->shouldReceive('execute')->with(m::type(GetHttpRequest::class))
+            ->shouldReceive('execute')->with(m::type(GetTransactionData::class));
 
         /*
         |------------------------------------------------------------

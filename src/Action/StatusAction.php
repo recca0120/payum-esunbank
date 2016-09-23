@@ -27,7 +27,7 @@ class StatusAction implements ActionInterface
         }
 
         if ($details['RC'] === '00') {
-            if (isset($details['MACD']) === true) {
+            if (isset($details['response']['MACD']) === true) {
                 $request->markCaptured();
 
                 return;

@@ -121,8 +121,10 @@ class ApiTest extends PHPUnit_Framework_TestCase
         */
 
         $params = [
-            'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
-            'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
+            'response' => [
+                'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
+                'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
+            ],
         ];
         $api->getTransactionData($params);
     }
@@ -209,5 +211,40 @@ class ApiTest extends PHPUnit_Framework_TestCase
         ];
         $api = new Api($options, $httpClient, $message);
         $this->assertSame('https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m', $api->getApiEndpoint());
+    }
+
+    public function test_refund_hash() {
+        /*
+        |------------------------------------------------------------
+        | Set
+        |------------------------------------------------------------
+        */
+
+        $httpClient = m::mock(HttpClientInterface::class);
+        $message = m::mock(MessageFactory::class);
+        $request = m::mock(stdClass::class);
+
+        /*
+        |------------------------------------------------------------
+        | Expectation
+        |------------------------------------------------------------
+        */
+
+        /*
+        |------------------------------------------------------------
+        | Assertion
+        |------------------------------------------------------------
+        */
+
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+        ];
+        $api = new Api($options, $httpClient, $message);
+
+        $this->assertSame('fb823f94e7584be22a2391843f6c6bdb99c9c9cba293b4cdd5de2155b1c2f09a', $api->calculateHash([
+            'TYPE' => '05',
+            'ONO' => '1452836854182',
+        ]));
     }
 }

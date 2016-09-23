@@ -31,8 +31,6 @@ class CaptureAction implements ActionInterface, GatewayAwareInterface
         $this->gateway->execute($httpRequest);
 
         if (isset($httpRequest->request['DATA']) === true) {
-            $details->replace($httpRequest->request);
-
             $this->gateway->execute(new Sync($details));
 
             return;
