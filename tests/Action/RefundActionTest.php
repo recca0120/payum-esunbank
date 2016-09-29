@@ -2,11 +2,7 @@
 
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
-use Payum\Core\GatewayInterface;
-use Payum\Core\Request\Refund;
-use Payum\Core\Request\Sync;
 use PayumTW\Esunbank\Action\RefundAction;
-use PayumTW\Esunbank\Request\Api\RefundTransaction;
 
 class RefundActionTest extends PHPUnit_Framework_TestCase
 {
@@ -24,8 +20,8 @@ class RefundActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new RefundAction();
-        $gateway = m::mock(GatewayInterface::class);
-        $request = m::mock(Refund::class);
+        $gateway = m::mock('Payum\Core\GatewayInterface');
+        $request = m::mock('Payum\Core\Request\Refund');
         $details = new ArrayObject();
 
         /*
@@ -37,8 +33,8 @@ class RefundActionTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getModel')->andReturn($details)->twice();
 
         $gateway
-            ->shouldReceive('execute')->with(m::type(RefundTransaction::class))
-            ->shouldReceive('execute')->with(m::type(Sync::class));
+            ->shouldReceive('execute')->with(m::type('PayumTW\Esunbank\Request\Api\RefundTransaction'))
+            ->shouldReceive('execute')->with(m::type('Payum\Core\Request\Sync'));
 
         /*
         |------------------------------------------------------------

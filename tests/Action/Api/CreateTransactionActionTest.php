@@ -4,8 +4,6 @@ use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Reply\HttpResponse;
 use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
-use PayumTW\Esunbank\Api;
-use PayumTW\Esunbank\Request\Api\CreateTransaction;
 
 class CreateTransactionActionTest extends PHPUnit_Framework_TestCase
 {
@@ -22,8 +20,8 @@ class CreateTransactionActionTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
-        $api = m::mock(Api::class);
-        $request = m::mock(CreateTransaction::class);
+        $api = m::mock('PayumTW\Esunbank\Api');
+        $request = m::mock('PayumTW\Esunbank\Request\Api\CreateTransaction');
         $details = new ArrayObject();
 
         /*

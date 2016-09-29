@@ -2,7 +2,6 @@
 
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
-use Payum\Core\Request\GetStatusInterface;
 use PayumTW\Esunbank\Action\StatusAction;
 
 class StatusActionTest extends PHPUnit_Framework_TestCase
@@ -21,7 +20,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new StatusAction();
-        $request = m::mock(GetStatusInterface::class);
+        $request = m::mock('Payum\Core\Request\GetStatusInterface');
         $model = new ArrayObject();
 
         /*
@@ -52,7 +51,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new StatusAction();
-        $request = m::mock(GetStatusInterface::class);
+        $request = m::mock('Payum\Core\Request\GetStatusInterface');
         $model = new ArrayObject([
             'RC' => '00',
             'response' => [
@@ -88,7 +87,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new StatusAction();
-        $request = m::mock(GetStatusInterface::class);
+        $request = m::mock('Payum\Core\Request\GetStatusInterface');
         $model = new ArrayObject([
             'RC' => '00',
             'AIR' => 'foo',
@@ -123,7 +122,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new StatusAction();
-        $request = m::mock(GetStatusInterface::class);
+        $request = m::mock('Payum\Core\Request\GetStatusInterface');
         $model = new ArrayObject([
             'RC' => '00',
             'AIR' => 'foo',
@@ -157,7 +156,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new StatusAction();
-        $request = m::mock(GetStatusInterface::class);
+        $request = m::mock('Payum\Core\Request\GetStatusInterface');
         $model = new ArrayObject([
             'RC' => '00',
         ]);
@@ -190,7 +189,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new StatusAction();
-        $request = m::mock(GetStatusInterface::class);
+        $request = m::mock('Payum\Core\Request\GetStatusInterface');
         $model = new ArrayObject([
             'RC' => '-1',
         ]);

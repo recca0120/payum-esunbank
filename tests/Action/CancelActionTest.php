@@ -2,11 +2,7 @@
 
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
-use Payum\Core\GatewayInterface;
-use Payum\Core\Request\Cancel;
-use Payum\Core\Request\Sync;
 use PayumTW\Esunbank\Action\CancelAction;
-use PayumTW\Esunbank\Request\Api\CancelTransaction;
 
 class CancelActionTest extends PHPUnit_Framework_TestCase
 {
@@ -24,8 +20,8 @@ class CancelActionTest extends PHPUnit_Framework_TestCase
         */
 
         $action = new CancelAction();
-        $gateway = m::mock(GatewayInterface::class);
-        $request = m::mock(Cancel::class);
+        $gateway = m::mock('Payum\Core\GatewayInterface');
+        $request = m::mock('Payum\Core\Request\Cancel');
         $details = new ArrayObject();
 
         /*
@@ -37,8 +33,8 @@ class CancelActionTest extends PHPUnit_Framework_TestCase
         $request->shouldReceive('getModel')->andReturn($details)->twice();
 
         $gateway
-            ->shouldReceive('execute')->with(m::type(CancelTransaction::class))
-            ->shouldReceive('execute')->with(m::type(Sync::class));
+            ->shouldReceive('execute')->with(m::type('PayumTW\Esunbank\Request\Api\CancelTransaction'))
+            ->shouldReceive('execute')->with(m::type('Payum\Core\Request\Sync'));
 
         /*
         |------------------------------------------------------------

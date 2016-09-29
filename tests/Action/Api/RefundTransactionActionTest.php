@@ -3,8 +3,6 @@
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\Api\RefundTransactionAction;
-use PayumTW\Esunbank\Api;
-use PayumTW\Esunbank\Request\Api\RefundTransaction;
 
 class RefundTransactionActionTest extends PHPUnit_Framework_TestCase
 {
@@ -21,8 +19,8 @@ class RefundTransactionActionTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
-        $api = m::mock(Api::class);
-        $request = m::mock(RefundTransaction::class);
+        $api = m::mock('PayumTW\Esunbank\Api');
+        $request = m::mock('PayumTW\Esunbank\Request\Api\RefundTransaction');
         $details = new ArrayObject(['ONO' => 'foo']);
 
         /*

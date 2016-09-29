@@ -3,8 +3,6 @@
 use Mockery as m;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
-use PayumTW\Esunbank\Api;
-use PayumTW\Esunbank\Request\Api\GetTransactionData;
 
 class GetTransactionDataActionTest extends PHPUnit_Framework_TestCase
 {
@@ -21,8 +19,8 @@ class GetTransactionDataActionTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
-        $api = m::mock(Api::class);
-        $request = m::mock(GetTransactionData::class);
+        $api = m::mock('PayumTW\Esunbank\Api');
+        $request = m::mock('PayumTW\Esunbank\Request\Api\GetTransactionData');
         $details = new ArrayObject();
 
         /*

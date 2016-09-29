@@ -1,8 +1,6 @@
 <?php
 
-use Http\Message\MessageFactory;
 use Mockery as m;
-use Payum\Core\HttpClientInterface;
 use PayumTW\Esunbank\Api;
 
 class ApiTest extends PHPUnit_Framework_TestCase
@@ -26,9 +24,9 @@ class ApiTest extends PHPUnit_Framework_TestCase
             'sandbox' => true,
         ];
 
-        $httpClient = m::mock(HttpClientInterface::class);
-        $message = m::mock(MessageFactory::class);
-        $request = m::mock(stdClass::class);
+        $httpClient = m::mock('Payum\Core\HttpClientInterface');
+        $message = m::mock('Http\Message\MessageFactory');
+        $request = m::mock('stdClass');
 
         /*
         |------------------------------------------------------------
@@ -102,9 +100,9 @@ class ApiTest extends PHPUnit_Framework_TestCase
             'sandbox' => true,
         ];
 
-        $httpClient = m::mock(HttpClientInterface::class);
-        $message = m::mock(MessageFactory::class);
-        $request = m::mock(stdClass::class);
+        $httpClient = m::mock('Payum\Core\HttpClientInterface');
+        $message = m::mock('Http\Message\MessageFactory');
+        $request = m::mock('stdClass');
 
         /*
         |------------------------------------------------------------
@@ -137,9 +135,9 @@ class ApiTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
-        $httpClient = m::mock(HttpClientInterface::class);
-        $message = m::mock(MessageFactory::class);
-        $request = m::mock(stdClass::class);
+        $httpClient = m::mock('Payum\Core\HttpClientInterface');
+        $message = m::mock('Http\Message\MessageFactory');
+        $request = m::mock('stdClass');
 
         /*
         |------------------------------------------------------------
@@ -178,9 +176,9 @@ class ApiTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
-        $httpClient = m::mock(HttpClientInterface::class);
-        $message = m::mock(MessageFactory::class);
-        $request = m::mock(stdClass::class);
+        $httpClient = m::mock('Payum\Core\HttpClientInterface');
+        $message = m::mock('Http\Message\MessageFactory');
+        $request = m::mock('stdClass');
 
         /*
         |------------------------------------------------------------
@@ -221,9 +219,9 @@ class ApiTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
-        $httpClient = m::mock(HttpClientInterface::class);
-        $message = m::mock(MessageFactory::class);
-        $request = m::mock(stdClass::class);
+        $httpClient = m::mock('Payum\Core\HttpClientInterface');
+        $message = m::mock('Http\Message\MessageFactory');
+        $request = m::mock('stdClass');
 
         /*
         |------------------------------------------------------------
