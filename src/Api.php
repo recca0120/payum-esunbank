@@ -211,8 +211,8 @@ class Api
         if (empty($params['response']) === false) {
             parse_str(str_replace(',', '&', $params['response']['DATA']), $details);
 
-            if ($details['RC'] === '00' && $this->verifyHash($params['response']['MACD'], $details) === false) {
-                $details['RC'] = 'GF';
+            if ($this->verifyHash($params['response']['MACD'], $details) === false) {
+                $details['RC'] = '-1';
             }
         } else {
             $supportedParams = [
@@ -338,7 +338,7 @@ class Api
      *
      * @return bool
      */
-    protected function verifyHash($macd, $data)
+    public function verifyHash($macd, $data)
     {
         return true;
 
