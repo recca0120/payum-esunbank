@@ -3,9 +3,9 @@
 namespace PayumTW\Esunbank\Action\Api;
 
 use Payum\Core\Bridge\Spl\ArrayObject;
-use Payum\Core\Exception\RequestNotSupportedException;
 use Payum\Core\Reply\HttpPostRedirect;
 use PayumTW\Esunbank\Request\Api\CreateTransaction;
+use Payum\Core\Exception\RequestNotSupportedException;
 
 class CreateTransactionAction extends BaseApiAwareAction
 {

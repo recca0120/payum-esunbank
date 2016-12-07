@@ -3,8 +3,8 @@
 namespace PayumTW\Esunbank;
 
 use Http\Message\MessageFactory;
-use Payum\Core\Exception\Http\HttpException;
 use Payum\Core\HttpClientInterface;
+use Payum\Core\Exception\Http\HttpException;
 
 class ApiV1
 {

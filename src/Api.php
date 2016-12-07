@@ -2,11 +2,11 @@
 
 namespace PayumTW\Esunbank;
 
+use LogicException;
 use Detection\MobileDetect;
 use Http\Message\MessageFactory;
-use LogicException;
-use Payum\Core\Exception\Http\HttpException;
 use Payum\Core\HttpClientInterface;
+use Payum\Core\Exception\Http\HttpException;
 
 class Api
 {
