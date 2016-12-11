@@ -11,36 +11,73 @@ class CancelTransactionActionTest extends PHPUnit_Framework_TestCase
         m::close();
     }
 
-    public function test_get_transaction_data()
+    public function test_execute()
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $api = m::mock('PayumTW\Esunbank\Api');
-        $request = m::mock('PayumTW\Esunbank\Request\Api\CancelTransaction');
-        $details = new ArrayObject(['ONO' => 'foo']);
+        $request = m::spy('PayumTW\Esunbank\Request\Api\CancelTransaction, ArrayAccess');
+        $api = m::spy('PayumTW\Esunbank\Api');
+        $input = [
+            'ONO' => 'foo'
+        ];
+        $details = new ArrayObject($input);
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
 
-        $request->shouldReceive('getModel')->twice()->andReturn($details);
+        $request
+            ->shouldReceive('getModel')->andReturn($details);
 
-        $api->shouldReceive('cancelTransaction')->with(['ONO' => 'foo'])->once()->andReturn($details);
+        $api
+            ->shouldReceive('cancelTransaction')->andReturn($details);
+
+        $action = new CancelTransactionAction();
+        $action->setApi($api);
 
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
+        |------------------------------------------------------------
+        */
+
+        $action->execute($request);
+        $request->shouldHaveReceived('getModel')->twice();
+        $api->shouldHaveReceived('cancelTransaction')->with($input)->once();
+    }
+
+    /**
+     * @expectedException Payum\Core\Exception\UnsupportedApiException
+     */
+    public function test_throw_exception_when_api_is_error()
+    {
+        /*
+        |------------------------------------------------------------
+        | Arrange
+        |------------------------------------------------------------
+        */
+
+        $api = m::spy('stdClass');
+
+        /*
+        |------------------------------------------------------------
+        | Act
         |------------------------------------------------------------
         */
 
         $action = new CancelTransactionAction();
         $action->setApi($api);
-        $action->execute($request);
+
+        /*
+        |------------------------------------------------------------
+        | Assert
+        |------------------------------------------------------------
+        */
     }
 }
