@@ -22,7 +22,7 @@ class CancelTransactionActionTest extends PHPUnit_Framework_TestCase
         $request = m::spy('PayumTW\Esunbank\Request\Api\CancelTransaction, ArrayAccess');
         $api = m::spy('PayumTW\Esunbank\Api');
         $input = [
-            'ONO' => 'foo'
+            'ONO' => 'foo',
         ];
         $details = new ArrayObject($input);
 

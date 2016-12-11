@@ -16,7 +16,6 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         $this->validate([], 'markNew');
     }
 
-
     public function test_request_mark_captured_by_macd()
     {
         $this->validate([
@@ -25,7 +24,6 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
                 'MACD' => 'foo',
             ],
         ], 'markCaptured');
-
     }
 
     public function test_request_mark_captured_by_air_and_txnamount()
