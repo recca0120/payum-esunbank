@@ -11,38 +11,39 @@ class CancelActionTest extends PHPUnit_Framework_TestCase
         m::close();
     }
 
-    public function test_execute()
+    public function test_cancel()
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
+
+        $request = m::spy('Payum\Core\Request\Cancel');
+        $gateway = m::spy('Payum\Core\GatewayInterface');
+        $details = new ArrayObject([]);
+
+        /*
+        |------------------------------------------------------------
+        | Act
+        |------------------------------------------------------------
+        */
+
+        $request
+            ->shouldReceive('getModel')->andReturn($details);
 
         $action = new CancelAction();
-        $gateway = m::mock('Payum\Core\GatewayInterface');
-        $request = m::mock('Payum\Core\Request\Cancel');
-        $details = new ArrayObject();
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request->shouldReceive('getModel')->andReturn($details)->twice();
-
-        $gateway
-            ->shouldReceive('execute')->with(m::type('PayumTW\Esunbank\Request\Api\CancelTransaction'))
-            ->shouldReceive('execute')->with(m::type('Payum\Core\Request\Sync'));
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
         $action->setGateway($gateway);
         $action->execute($request);
+
+        /*
+        |------------------------------------------------------------
+        | Assert
+        |------------------------------------------------------------
+        */
+
+        $request->shouldHaveReceived('getModel')->twice();
+        $gateway->shouldHaveReceived('execute')->with(m::type('PayumTW\Esunbank\Request\Api\CancelTransaction'))->once();
+        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\Sync'))->once();
     }
 }
