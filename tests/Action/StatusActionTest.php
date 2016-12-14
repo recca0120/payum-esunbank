@@ -11,205 +11,81 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
         m::close();
     }
 
-    public function test_request_mark_new()
+    public function test_mark_new()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $action = new StatusAction();
-        $request = m::mock('Payum\Core\Request\GetStatusInterface');
-        $model = new ArrayObject();
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($model)->twice()
-            ->shouldReceive('markNew')->once();
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
-        $action->execute($request);
+        $this->validate([], 'markNew');
     }
 
     public function test_request_mark_captured_by_macd()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $action = new StatusAction();
-        $request = m::mock('Payum\Core\Request\GetStatusInterface');
-        $model = new ArrayObject([
+        $this->validate([
             'RC' => '00',
             'response' => [
                 'MACD' => 'foo',
             ],
-        ]);
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($model)->twice()
-            ->shouldReceive('markCaptured')->once();
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
-        $action->execute($request);
+        ], 'markCaptured');
     }
 
     public function test_request_mark_captured_by_air_and_txnamount()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $action = new StatusAction();
-        $request = m::mock('Payum\Core\Request\GetStatusInterface');
-        $model = new ArrayObject([
+        $this->validate([
             'RC' => '00',
             'AIR' => 'foo',
             'TXNAMOUNT' => 'bar',
-        ]);
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($model)->twice()
-            ->shouldReceive('markCaptured')->once();
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
-        $action->execute($request);
+        ], 'markCaptured');
     }
 
     public function test_request_mark_cancel()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $action = new StatusAction();
-        $request = m::mock('Payum\Core\Request\GetStatusInterface');
-        $model = new ArrayObject([
+        $this->validate([
             'RC' => '00',
             'AIR' => 'foo',
-        ]);
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($model)->twice()
-            ->shouldReceive('markCanceled')->once();
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
-        $action->execute($request);
+        ], 'markCanceled');
     }
 
     public function test_request_mark_refund()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $action = new StatusAction();
-        $request = m::mock('Payum\Core\Request\GetStatusInterface');
-        $model = new ArrayObject([
+        $this->validate([
             'RC' => '00',
-        ]);
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($model)->twice()
-            ->shouldReceive('markRefunded')->once();
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
-        $action->execute($request);
+        ], 'markRefunded');
     }
 
     public function test_request_mark_failed()
     {
+        $this->validate([
+            'RC' => '-1',
+        ], 'markFailed');
+    }
+
+    protected function validate($input, $type)
+    {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
+
+        $request = m::spy('Payum\Core\Request\GetStatusInterface');
+        $details = new ArrayObject($input);
+
+        /*
+        |------------------------------------------------------------
+        | Act
+        |------------------------------------------------------------
+        */
+
+        $request->shouldReceive('getModel')->andReturn($details);
 
         $action = new StatusAction();
-        $request = m::mock('Payum\Core\Request\GetStatusInterface');
-        $model = new ArrayObject([
-            'RC' => '-1',
-        ]);
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($model)->twice()
-            ->shouldReceive('markFailed')->once();
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
         $action->execute($request);
+
+        /*
+        |------------------------------------------------------------
+        | Assert
+        |------------------------------------------------------------
+        */
+
+        $request->shouldHaveReceived('getModel')->twice();
+        $request->shouldHaveReceived($type)->once();
     }
 }

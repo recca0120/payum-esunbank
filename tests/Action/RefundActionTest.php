@@ -15,34 +15,35 @@ class RefundActionTest extends PHPUnit_Framework_TestCase
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $action = new RefundAction();
-        $gateway = m::mock('Payum\Core\GatewayInterface');
-        $request = m::mock('Payum\Core\Request\Refund');
+        $gateway = m::spy('Payum\Core\GatewayInterface');
+        $request = m::spy('Payum\Core\Request\Refund');
         $details = new ArrayObject();
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
 
-        $request->shouldReceive('getModel')->andReturn($details)->twice();
+        $request
+            ->shouldReceive('getModel')->andReturn($details);
 
-        $gateway
-            ->shouldReceive('execute')->with(m::type('PayumTW\Esunbank\Request\Api\RefundTransaction'))
-            ->shouldReceive('execute')->with(m::type('Payum\Core\Request\Sync'));
+        $action = new RefundAction();
+        $action->setGateway($gateway);
+        $action->execute($request);
 
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
         |------------------------------------------------------------
         */
 
-        $action->setGateway($gateway);
-        $action->execute($request);
+        $request->shouldHaveReceived('getModel')->twice();
+        $gateway->shouldHaveReceived('execute')->with(m::type('PayumTW\Esunbank\Request\Api\RefundTransaction'))->once();
+        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\Sync'))->once();
     }
 }

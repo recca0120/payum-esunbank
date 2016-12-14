@@ -15,84 +15,90 @@ class CaptureActionTest extends PHPUnit_Framework_TestCase
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $action = new CaptureAction();
-        $gateway = m::mock('Payum\Core\GatewayInterface');
-        $request = m::mock('Payum\Core\Request\Capture');
-        $token = m::mock('stdClass');
+        $gateway = m::spy('Payum\Core\GatewayInterface');
+        $request = m::spy('Payum\Core\Request\Capture');
+        $token = m::spy('Payum\Core\Model\TokenInterface');
         $details = new ArrayObject([]);
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
 
-        $gateway
-            ->shouldReceive('execute')->with(m::type('Payum\Core\Request\GetHttpRequest'))->once()
-            ->shouldReceive('execute')->with(m::type('PayumTW\Esunbank\Request\Api\CreateTransaction'))->once();
-
         $request
-            ->shouldReceive('getModel')->twice()->andReturn($details)
-            ->shouldReceive('getToken')->once()->andReturn($token);
+            ->shouldReceive('getModel')->andReturn($details)
+            ->shouldReceive('getToken')->andReturn($token);
 
         $token
             ->shouldReceive('getTargetUrl')->andReturn('fooOrderResultURL');
 
+        $action = new CaptureAction();
+        $action->setGateway($gateway);
+        $action->execute($request);
+
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
         |------------------------------------------------------------
         */
 
-        $action->setGateway($gateway);
-        $action->execute($request);
         $this->assertSame([
             'U' => 'fooOrderResultURL',
         ], (array) $details);
+
+        $request->shouldHaveReceived('getModel')->twice();
+        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\GetHttpRequest'))->once();
+        $request->shouldHaveReceived('getToken')->once();
+        $token->shouldHaveReceived('getTargetUrl')->once();
+        $gateway->shouldHaveReceived('execute')->with(m::type('PayumTW\Esunbank\Request\Api\CreateTransaction'))->once();
     }
 
     public function test_captured()
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $action = new CaptureAction();
-        $gateway = m::mock('Payum\Core\GatewayInterface');
-        $request = m::mock('Payum\Core\Request\Capture');
-        $token = m::mock('stdClass');
-        $api = m::mock('PayumTW\Esunbank\Api');
+        $gateway = m::spy('Payum\Core\GatewayInterface');
+        $request = m::spy('Payum\Core\Request\Capture');
+        $token = m::spy('Payum\Core\Model\TokenInterface');
         $details = new ArrayObject([]);
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
+
+        $request
+            ->shouldReceive('getModel')->andReturn($details);
 
         $gateway
             ->shouldReceive('execute')->with('Payum\Core\Request\GetHttpRequest')->once()->andReturnUsing(function ($request) {
                 $request->request = ['DATA' => ['foo' => 'bar']];
 
                 return $request;
-            })
-            ->shouldReceive('execute')->with(m::type('Payum\Core\Request\Sync'))->once();
+            });
 
-        $request->shouldReceive('getModel')->twice()->andReturn($details);
+        $action = new CaptureAction();
+        $action->setGateway($gateway);
+        $action->execute($request);
 
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
         |------------------------------------------------------------
         */
 
-        $action->setGateway($gateway);
-        $action->execute($request);
+        $request->shouldHaveReceived('getModel')->twice();
+        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\GetHttpRequest'))->once();
+        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\Sync'))->once();
     }
 }
