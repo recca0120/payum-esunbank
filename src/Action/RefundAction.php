@@ -2,7 +2,6 @@
 
 namespace PayumTW\Esunbank\Action;
 
-use Payum\Core\Request\Sync;
 use Payum\Core\Request\Refund;
 use Payum\Core\GatewayAwareTrait;
 use Payum\Core\GatewayAwareInterface;
@@ -27,8 +26,6 @@ class RefundAction implements ActionInterface, GatewayAwareInterface
         $details = ArrayObject::ensureArrayObject($request->getModel());
 
         $this->gateway->execute(new RefundTransaction($details));
-
-        $this->gateway->execute(new Sync($details));
     }
 
     /**

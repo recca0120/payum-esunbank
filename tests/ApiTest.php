@@ -86,46 +86,46 @@ class ApiTest extends PHPUnit_Framework_TestCase
         $this->assertSame('e2d6079a5623815c09f5108789c867beb532a630756e12d27ecb1ecc3909dffe', $params['mac']);
     }
 
-    public function test_get_transaction_data()
-    {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $options = [
-            'MID' => '8089000016',
-            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-            'sandbox' => true,
-        ];
-
-        $httpClient = m::mock('Payum\Core\HttpClientInterface');
-        $message = m::mock('Http\Message\MessageFactory');
-        $request = m::mock('stdClass');
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $api = new Api($options, $httpClient, $message);
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
-        $params = [
-            'response' => [
-                'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
-                'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
-            ],
-        ];
-        $api->getTransactionData($params);
-    }
+    // public function test_get_transaction_data()
+    // {
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Set
+    //     |------------------------------------------------------------
+    //     */
+    //
+    //     $options = [
+    //         'MID' => '8089000016',
+    //         'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+    //         'sandbox' => true,
+    //     ];
+    //
+    //     $httpClient = m::mock('Payum\Core\HttpClientInterface');
+    //     $message = m::mock('Http\Message\MessageFactory');
+    //     $request = m::mock('stdClass');
+    //
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Expectation
+    //     |------------------------------------------------------------
+    //     */
+    //
+    //     $api = new Api($options, $httpClient, $message);
+    //
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Assertion
+    //     |------------------------------------------------------------
+    //     */
+    //
+    //     $params = [
+    //         'response' => [
+    //             'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
+    //             'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
+    //         ],
+    //     ];
+    //     $api->getTransactionData($params);
+    // }
 
     public function test_desktop_endpoint_url()
     {

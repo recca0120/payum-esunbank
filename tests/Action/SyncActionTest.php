@@ -44,7 +44,6 @@ class SyncActionTest extends PHPUnit_Framework_TestCase
         */
 
         $request->shouldHaveReceived('getModel')->twice();
-        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\GetHttpRequest'))->once();
         $gateway->shouldHaveReceived('execute')->with(m::type('PayumTW\Esunbank\Request\Api\GetTransactionData'))->once();
     }
 }

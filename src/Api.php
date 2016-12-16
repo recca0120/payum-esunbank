@@ -146,38 +146,35 @@ class Api
      */
     public function getTransactionData(array $params)
     {
-        $details = [];
+        $supportedParams = [
+            // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
+            'ONO' => '',
+            // 特店代碼
+            'MID' => $this->options['MID'],
+        ];
 
-        if (empty($params['response']) === false) {
-            parse_str(str_replace(',', '&', $params['response']['DATA']), $details);
+        $data = array_replace(
+            $supportedParams,
+            array_intersect_key($params, $supportedParams)
+        );
 
-            if ($this->verifyHash($params['response']['MACD'], $details) === false) {
-                $details['RC'] = '-1';
-            }
-        } else {
-            $supportedParams = [
-                // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
-                'ONO' => '',
-                // 特店代碼
-                'MID' => $this->options['MID'],
-            ];
+        $data['ONO'] = strtoupper($data['ONO']);
 
-            $data = array_replace(
-                $supportedParams,
-                array_intersect_key($params, $supportedParams)
-            );
-
-            $data['ONO'] = strtoupper($data['ONO']);
-
-            $body = $this->doRequest($this->prepareRequestData($data), 'sync');
-            $response = json_decode($body['DATA'], true);
-            $details = $response['txnData'];
-            $details['response'] = $response;
-        }
+        $body = $this->doRequest($this->prepareRequestData($data), 'sync');
+        $response = json_decode($body['DATA'], true);
+        $details = $response['txnData'];
+        $details['response'] = $response;
 
         return $details;
     }
 
+    /**
+     * refundTransaction.
+     *
+     * @param  array  $params
+     *
+     * @return array
+     */
     public function refundTransaction(array $params)
     {
         $details = [];
@@ -208,6 +205,13 @@ class Api
         return $details;
     }
 
+    /**
+     * cancelTransaction.
+     *
+     * @param  array  $params
+     *
+     * @return array
+     */
     public function cancelTransaction(array $params)
     {
         $supportedParams = [
@@ -286,6 +290,25 @@ class Api
         }
 
         return $result;
+    }
+
+    /**
+     * parseResponse.
+     *
+     * @param  array $response
+     *
+     * @return array
+     */
+    public function parseResponse($response)
+    {
+        $details = [];
+        parse_str(str_replace(',', '&', $response['DATA'], $details));
+
+        if ($this->verifyHash($response['MACD'], $details) === false) {
+            $details['RC'] = '-1';
+        }
+
+        return array_merge($response, $details);
     }
 
     /**

@@ -20,9 +20,7 @@ class StatusActionTest extends PHPUnit_Framework_TestCase
     {
         $this->validate([
             'RC' => '00',
-            'response' => [
-                'MACD' => 'foo',
-            ],
+            'MACD' => 'foo',
         ], 'markCaptured');
     }
 

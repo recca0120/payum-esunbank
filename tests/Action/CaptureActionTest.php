@@ -66,6 +66,7 @@ class CaptureActionTest extends PHPUnit_Framework_TestCase
         |------------------------------------------------------------
         */
 
+        $api = m::spy('PayumTW\Esunbank\Api');
         $gateway = m::spy('Payum\Core\GatewayInterface');
         $request = m::spy('Payum\Core\Request\Capture');
         $token = m::spy('Payum\Core\Model\TokenInterface');
@@ -87,7 +88,10 @@ class CaptureActionTest extends PHPUnit_Framework_TestCase
                 return $request;
             });
 
+        $api->shouldReceive('parseResponse')->andReturn([]);
+
         $action = new CaptureAction();
+        $action->setApi($api);
         $action->setGateway($gateway);
         $action->execute($request);
 
@@ -99,6 +103,5 @@ class CaptureActionTest extends PHPUnit_Framework_TestCase
 
         $request->shouldHaveReceived('getModel')->twice();
         $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\GetHttpRequest'))->once();
-        $gateway->shouldHaveReceived('execute')->with(m::type('Payum\Core\Request\Sync'))->once();
     }
 }
