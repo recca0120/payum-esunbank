@@ -177,8 +177,6 @@ class Api
      */
     public function refundTransaction(array $params)
     {
-        $details = [];
-
         $supportedParams = [
             // 05:授權 51:取消授權 71:退貨授權
             'TYP' => '71',
@@ -198,11 +196,8 @@ class Api
         $data['ONO'] = strtoupper($data['ONO']);
 
         $body = $this->doRequest($this->prepareRequestData($data), 'refund');
-        $response = json_decode($body['DATA'], true);
-        $details = $response['txnData'];
-        $details['response'] = $response;
 
-        return $details;
+        return json_decode($body['DATA'], true);
     }
 
     /**
@@ -231,11 +226,8 @@ class Api
         $data['ONO'] = strtoupper($data['ONO']);
 
         $body = $this->doRequest($this->prepareRequestData($data), 'cancel');
-        $response = json_decode($body['DATA'], true);
-        $details = $response['txnData'];
-        $details['response'] = $response;
 
-        return $details;
+        return json_decode($body['DATA'], true);
     }
 
     /**
@@ -301,14 +293,10 @@ class Api
      */
     public function parseResponse($response)
     {
-        $details = [];
-        parse_str(str_replace(',', '&', $response['DATA'], $details));
+        $result = [];
+        parse_str(str_replace(',', '&', $response['DATA']), $result);
 
-        if ($this->verifyHash($response['MACD'], $details) === false) {
-            $details['RC'] = '-1';
-        }
-
-        return array_merge($response, $details);
+        return array_merge($response, $result);
     }
 
     /**

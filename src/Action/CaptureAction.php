@@ -31,7 +31,12 @@ class CaptureAction extends BaseApiAwareAction implements ActionInterface, Gatew
         $this->gateway->execute($httpRequest);
 
         if (isset($httpRequest->request['DATA']) === true) {
-            $details->replace($this->api->parseResponse($httpRequest->request['DATA']));
+            $httpRequest->request = $this->api->parseResponse($httpRequest->request);
+            if ($this->verifyHash($httpRequest->request['MACD'], $details) === false) {
+                $httpRequest->request['RC'] = '-1';
+            }
+
+            $details->replace($httpRequest->request);
 
             return;
         }

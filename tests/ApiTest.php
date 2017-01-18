@@ -14,7 +14,7 @@ class ApiTest extends PHPUnit_Framework_TestCase
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
@@ -24,13 +24,12 @@ class ApiTest extends PHPUnit_Framework_TestCase
             'sandbox' => true,
         ];
 
-        $httpClient = m::mock('Payum\Core\HttpClientInterface');
-        $message = m::mock('Http\Message\MessageFactory');
-        $request = m::mock('stdClass');
+        $httpClient = m::spy('Payum\Core\HttpClientInterface');
+        $message = m::spy('Http\Message\MessageFactory');
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
 
@@ -38,7 +37,7 @@ class ApiTest extends PHPUnit_Framework_TestCase
 
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
         |------------------------------------------------------------
         */
 
@@ -86,68 +85,77 @@ class ApiTest extends PHPUnit_Framework_TestCase
         $this->assertSame('e2d6079a5623815c09f5108789c867beb532a630756e12d27ecb1ecc3909dffe', $params['mac']);
     }
 
-    // public function test_get_transaction_data()
-    // {
-    //     /*
-    //     |------------------------------------------------------------
-    //     | Set
-    //     |------------------------------------------------------------
-    //     */
-    //
-    //     $options = [
-    //         'MID' => '8089000016',
-    //         'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-    //         'sandbox' => true,
-    //     ];
-    //
-    //     $httpClient = m::mock('Payum\Core\HttpClientInterface');
-    //     $message = m::mock('Http\Message\MessageFactory');
-    //     $request = m::mock('stdClass');
-    //
-    //     /*
-    //     |------------------------------------------------------------
-    //     | Expectation
-    //     |------------------------------------------------------------
-    //     */
-    //
-    //     $api = new Api($options, $httpClient, $message);
-    //
-    //     /*
-    //     |------------------------------------------------------------
-    //     | Assertion
-    //     |------------------------------------------------------------
-    //     */
-    //
-    //     $params = [
-    //         'response' => [
-    //             'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
-    //             'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
-    //         ],
-    //     ];
-    //     $api->getTransactionData($params);
-    // }
+    public function test_parse_response()
+    {
+        /*
+        |------------------------------------------------------------
+        | Arrange
+        |------------------------------------------------------------
+        */
+
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+
+        $httpClient = m::spy('Payum\Core\HttpClientInterface');
+        $message = m::spy('Http\Message\MessageFactory');
+        $response = [
+            'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
+            'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
+        ];
+
+        /*
+        |------------------------------------------------------------
+        | Act
+        |------------------------------------------------------------
+        */
+
+        $api = new Api($options, $httpClient, $message);
+
+        /*
+        |------------------------------------------------------------
+        | Assert
+        |------------------------------------------------------------
+        */
+
+        $this->assertSame([
+          'DATA' => "RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185",
+          'MACD' => "c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee",
+          'RC' => "00",
+          'MID' => "8080000002",
+          'ONO' => "1456296932846",
+          'LTD' => "20160224",
+          'LTT' => "150228",
+          'RRN' => "506055000001",
+          'AIR' => "702715",
+          'AN' => "552199******185",
+        ], $api->parseResponse($response));
+    }
 
     public function test_desktop_endpoint_url()
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $httpClient = m::mock('Payum\Core\HttpClientInterface');
-        $message = m::mock('Http\Message\MessageFactory');
-        $request = m::mock('stdClass');
+        $httpClient = m::spy('Payum\Core\HttpClientInterface');
+        $message = m::spy('Http\Message\MessageFactory');
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
 
+
+
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
         |------------------------------------------------------------
         */
 
@@ -172,23 +180,22 @@ class ApiTest extends PHPUnit_Framework_TestCase
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $httpClient = m::mock('Payum\Core\HttpClientInterface');
-        $message = m::mock('Http\Message\MessageFactory');
-        $request = m::mock('stdClass');
+        $httpClient = m::spy('Payum\Core\HttpClientInterface');
+        $message = m::spy('Http\Message\MessageFactory');
 
         /*
         |------------------------------------------------------------
-        | Expectation
+        | Act
         |------------------------------------------------------------
         */
 
         /*
         |------------------------------------------------------------
-        | Assertion
+        | Assert
         |------------------------------------------------------------
         */
 
@@ -215,30 +222,52 @@ class ApiTest extends PHPUnit_Framework_TestCase
     {
         /*
         |------------------------------------------------------------
-        | Set
+        | Arrange
         |------------------------------------------------------------
         */
 
-        $httpClient = m::mock('Payum\Core\HttpClientInterface');
-        $message = m::mock('Http\Message\MessageFactory');
-        $request = m::mock('stdClass');
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
+        $httpClient = m::spy('Payum\Core\HttpClientInterface');
+        $message = m::spy('Http\Message\MessageFactory');
+        $request = m::spy('Psr\Http\Message\RequestInterface');
+        $response = m::spy('Psr\Http\Message\ResponseInterface');
 
         $options = [
+            'MID' => '8089000016',
             'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
         ];
+
+        $responseValue = 'DATA=RC=00,MID=8089000016,ONO=1456296932846,LTD=20090605,LTT=151930&MACD=fb823f94e7584be22a2391843f6c6bdb99c9c9cba293b4cdd5de2155b1c2f09a';
+
+        /*
+        |------------------------------------------------------------
+        | Act
+        |------------------------------------------------------------
+        */
+
+        $message
+            ->shouldReceive('createRequest')->andReturn($request);
+
+        $httpClient
+            ->shouldReceive('send')->with($request)->andReturn($response);
+
+        $response
+            ->shouldReceive('getStatusCode')->andReturn(200)
+            ->shouldReceive('getBody->getContents')->andReturn($responseValue);
+
         $api = new Api($options, $httpClient, $message);
+
+        /*
+        |------------------------------------------------------------
+        | Assert
+        |------------------------------------------------------------
+        */
+
+        var_dump($api->refundTransaction([
+            'TYP' => '05',
+            'ONO' => '1452836854182',
+        ]));
+
 
         $this->assertSame(hash('sha256', '{"TYP":"05","ONO":"1452836854182","MID":"8089000016"}WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B'), $api->calculateHash([
             'TYP' => '05',
