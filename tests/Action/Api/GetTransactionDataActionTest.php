@@ -4,6 +4,7 @@ namespace PayumTW\Esunbank\Tests\Api;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Request\Api\GetTransactionData;
 use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
 
@@ -17,7 +18,7 @@ class GetTransactionDataActionTest extends TestCase
     public function testExecute()
     {
         $action = new GetTransactionDataAction();
-        $request = new GetTransactionData([]);
+        $request = new GetTransactionData(new ArrayObject([]));
 
         $action->setApi(
             $api = m::mock('PayumTW\Esunbank\Api')

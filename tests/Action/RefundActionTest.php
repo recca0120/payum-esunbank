@@ -3,8 +3,8 @@
 namespace PayumTW\Esunbank\Tests;
 
 use Mockery as m;
-use PHPUnit\Framework\TestCase;
 use Payum\Core\Request\Refund;
+use PHPUnit\Framework\TestCase;
 use PayumTW\Esunbank\Action\RefundAction;
 
 class RefundActionTest extends TestCase

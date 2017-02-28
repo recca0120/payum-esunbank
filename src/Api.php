@@ -48,7 +48,7 @@ class Api
      */
     protected function doRequest(array $fields, $type = 'sync')
     {
-        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type),  [
+        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type), [
             'Content-Type' => 'application/x-www-form-urlencoded',
         ], http_build_query($this->encrypter->encryptRequest($fields)));
 

@@ -4,6 +4,7 @@ namespace PayumTW\Esunbank\Tests\Api;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Request\Api\RefundTransaction;
 use PayumTW\Esunbank\Action\Api\RefundTransactionAction;
 
@@ -17,7 +18,7 @@ class RefundTransactionActionTest extends TestCase
     public function testExecute()
     {
         $action = new RefundTransactionAction();
-        $request = new RefundTransaction(['ONO' => 'foo']);
+        $request = new RefundTransaction(new ArrayObject(['ONO' => 'foo']));
 
         $action->setApi(
             $api = m::mock('PayumTW\Esunbank\Api')

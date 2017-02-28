@@ -4,6 +4,7 @@ namespace PayumTW\Esunbank\Tests\Api;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Request\Api\CancelTransaction;
 use PayumTW\Esunbank\Action\Api\CancelTransactionAction;
 
@@ -17,7 +18,7 @@ class CancelTransactionActionTest extends TestCase
     public function testExecute()
     {
         $action = new CancelTransactionAction();
-        $request = new CancelTransaction(['ONO' => 'foo']);
+        $request = new CancelTransaction(new ArrayObject(['ONO' => 'foo']));
 
         $action->setApi(
             $api = m::mock('PayumTW\Esunbank\Api')

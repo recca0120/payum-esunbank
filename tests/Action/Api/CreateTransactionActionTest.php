@@ -4,6 +4,7 @@ namespace PayumTW\Esunbank\Tests\Api;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Reply\HttpPostRedirect;
 use PayumTW\Esunbank\Request\Api\CreateTransaction;
 use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
@@ -18,7 +19,7 @@ class CreateTransactionActionTest extends TestCase
     public function testExecute()
     {
         $action = new CreateTransactionAction();
-        $request = new CreateTransaction([]);
+        $request = new CreateTransaction(new ArrayObject([]));
 
         $action->setApi(
             $api = m::mock('PayumTW\Esunbank\Api')
