@@ -1,10 +1,11 @@
 <?php
 
-namespace PayumTW\Esunbank\Tests;
+namespace PayumTW\Esunbank\Tests\Action;
 
 use Mockery as m;
 use Payum\Core\Request\Sync;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\SyncAction;
 
 class SyncActionTest extends TestCase
@@ -17,7 +18,7 @@ class SyncActionTest extends TestCase
     public function testExecute()
     {
         $action = new SyncAction();
-        $request = m::mock(new Sync([]));
+        $request = new Sync(new ArrayObject([]));
 
         $action->setGateway(
             $gateway = m::mock('Payum\Core\GatewayInterface')

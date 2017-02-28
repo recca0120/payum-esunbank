@@ -1,6 +1,6 @@
 <?php
 
-namespace PayumTW\Esunbank\Tests\Api;
+namespace PayumTW\Esunbank\Tests\Action\Api;
 
 use Mockery as m;
 use PHPUnit\Framework\TestCase;

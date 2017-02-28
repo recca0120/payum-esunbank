@@ -1,10 +1,11 @@
 <?php
 
-namespace PayumTW\Esunbank\Tests;
+namespace PayumTW\Esunbank\Tests\Action;
 
 use Mockery as m;
 use Payum\Core\Request\Cancel;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\CancelAction;
 
 class CancelActionTest extends TestCase
@@ -17,7 +18,7 @@ class CancelActionTest extends TestCase
     public function testExecute()
     {
         $action = new CancelAction();
-        $request = m::mock(new Cancel([]));
+        $request = new Cancel(new ArrayObject([]));
 
         $action->setGateway(
             $gateway = m::mock('Payum\Core\GatewayInterface')

@@ -1,10 +1,11 @@
 <?php
 
-namespace PayumTW\Esunbank\Tests;
+namespace PayumTW\Esunbank\Tests\Action;
 
 use Mockery as m;
 use Payum\Core\Request\Refund;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use PayumTW\Esunbank\Action\RefundAction;
 
 class RefundActionTest extends TestCase
@@ -17,7 +18,7 @@ class RefundActionTest extends TestCase
     public function testExecute()
     {
         $action = new RefundAction();
-        $request = m::mock(new Refund([]));
+        $request = new Refund(new ArrayObject([]));
 
         $action->setGateway(
             $gateway = m::mock('Payum\Core\GatewayInterface')

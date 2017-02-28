@@ -1,10 +1,11 @@
 <?php
 
-namespace PayumTW\Esunbank\Tests;
+namespace PayumTW\Esunbank\Tests\Action;
 
 use Mockery as m;
 use Payum\Core\Request\Capture;
 use PHPUnit\Framework\TestCase;
+use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Request\GetHttpRequest;
 use PayumTW\Esunbank\Action\CaptureAction;
 
@@ -18,7 +19,7 @@ class CaptureActionTest extends TestCase
     public function testExecute()
     {
         $action = new CaptureAction();
-        $request = m::mock(new Capture([]));
+        $request = m::mock(new Capture(new ArrayObject([])));
         $action->setGateway(
             $gateway = m::mock('Payum\Core\GatewayInterface')
         );
@@ -39,7 +40,7 @@ class CaptureActionTest extends TestCase
     public function testCaptured()
     {
         $action = new CaptureAction();
-        $request = m::mock(new Capture([]));
+        $request = new Capture(new ArrayObject([]));
 
         $action->setGateway(
             $gateway = m::mock('Payum\Core\GatewayInterface')
@@ -71,7 +72,7 @@ class CaptureActionTest extends TestCase
     public function testCaptureFail()
     {
         $action = new CaptureAction();
-        $request = m::mock(new Capture([]));
+        $request = new Capture(new ArrayObject([]));
 
         $action->setGateway(
             $gateway = m::mock('Payum\Core\GatewayInterface')
