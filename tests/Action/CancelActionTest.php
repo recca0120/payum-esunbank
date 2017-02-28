@@ -1,48 +1,30 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests;
+
 use Mockery as m;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use PHPUnit\Framework\TestCase;
+use Payum\Core\Request\Cancel;
 use PayumTW\Esunbank\Action\CancelAction;
 
-class CancelActionTest extends PHPUnit_Framework_TestCase
+class CancelActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_cancel()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $request = m::spy('Payum\Core\Request\Cancel');
-        $gateway = m::spy('Payum\Core\GatewayInterface');
-        $details = new ArrayObject([]);
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($details);
-
         $action = new CancelAction();
-        $action->setGateway($gateway);
+        $request = m::mock(new Cancel([]));
+
+        $action->setGateway(
+            $gateway = m::mock('Payum\Core\GatewayInterface')
+        );
+
+        $gateway->shouldReceive('execute')->once()->with('PayumTW\Esunbank\Request\Api\CancelTransaction');
+
         $action->execute($request);
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        $request->shouldHaveReceived('getModel')->twice();
-        $gateway->shouldHaveReceived('execute')->with(m::type('PayumTW\Esunbank\Request\Api\CancelTransaction'))->once();
     }
 }

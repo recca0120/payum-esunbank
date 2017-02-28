@@ -1,64 +1,33 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests\Action;
+
 use Mockery as m;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use Payum\Core\Request\Convert;
+use PHPUnit\Framework\TestCase;
 use PayumTW\Esunbank\Action\ConvertPaymentAction;
 
-class ConvertPaymentActionTest extends PHPUnit_Framework_TestCase
+class ConvertPaymentActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_execute()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $request = m::spy('Payum\Core\Request\Convert');
-        $source = m::spy('Payum\Core\Model\PaymentInterface');
-        $details = new ArrayObject();
-
-        $number = uniqid();
-        $totalAmount = 1000;
-        $description = 'foo.description';
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getSource')->andReturn($source)
-            ->shouldReceive('getTo')->andReturn('array');
-
-        $source
-            ->shouldReceive('getDetails')->andReturn($details)
-            ->shouldReceive('getNumber')->andReturn($number)
-            ->shouldReceive('getTotalAmount')->andReturn($totalAmount);
-
         $action = new ConvertPaymentAction();
+        $request = new Convert(
+            $payment = m::mock('Payum\Core\Model\PaymentInterface'),
+            $to = 'array'
+        );
+        $payment->shouldReceive('getDetails')->once()->andReturn([]);
+        $payment->shouldReceive('getNumber')->once()->andReturn($number = 'foo');
+        $payment->shouldReceive('getTotalAmount')->once()->andReturn($totalAmount = 'foo');
         $action->execute($request);
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        $request->shouldHaveReceived('getSource')->twice();
-        $request->shouldHaveReceived('getTo')->once();
-        $source->shouldHaveReceived('getDetails')->once();
-        $source->shouldHaveReceived('getNumber')->once();
-        $source->shouldHaveReceived('getTotalAmount')->once();
-        $request->shouldHaveReceived('setResult')->with([
+        $this->assertSame([
             'ONO' => strtoupper($number),
             'TA' => $totalAmount,
-        ])->once();
+        ], $request->getResult());
     }
 }

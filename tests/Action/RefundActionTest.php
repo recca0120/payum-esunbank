@@ -1,48 +1,30 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests;
+
 use Mockery as m;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use PHPUnit\Framework\TestCase;
+use Payum\Core\Request\Refund;
 use PayumTW\Esunbank\Action\RefundAction;
 
-class RefundActionTest extends PHPUnit_Framework_TestCase
+class RefundActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_execute()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $gateway = m::spy('Payum\Core\GatewayInterface');
-        $request = m::spy('Payum\Core\Request\Refund');
-        $details = new ArrayObject();
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($details);
-
         $action = new RefundAction();
-        $action->setGateway($gateway);
+        $request = m::mock(new Refund([]));
+
+        $action->setGateway(
+            $gateway = m::mock('Payum\Core\GatewayInterface')
+        );
+
+        $gateway->shouldReceive('execute')->once()->with('PayumTW\Esunbank\Request\Api\RefundTransaction');
+
         $action->execute($request);
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        $request->shouldHaveReceived('getModel')->twice();
-        $gateway->shouldHaveReceived('execute')->with(m::type('PayumTW\Esunbank\Request\Api\RefundTransaction'))->once();
     }
 }

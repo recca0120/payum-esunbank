@@ -1,54 +1,32 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests\Api;
+
 use Mockery as m;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use PHPUnit\Framework\TestCase;
+use PayumTW\Esunbank\Request\Api\GetTransactionData;
 use PayumTW\Esunbank\Action\Api\GetTransactionDataAction;
 
-class GetTransactionDataActionTest extends PHPUnit_Framework_TestCase
+class GetTransactionDataActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_get_transaction_data()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $api = m::spy('PayumTW\Esunbank\Api');
-        $request = m::spy('PayumTW\Esunbank\Request\Api\GetTransactionData');
-        $details = m::mock(new ArrayObject([]));
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($details);
-
-        $api
-            ->shouldReceive('getTransactionData')->andReturn([
-                'RC' => '1',
-            ]);
-
         $action = new GetTransactionDataAction();
-        $action->setApi($api);
+        $request = new GetTransactionData([]);
+
+        $action->setApi(
+            $api = m::mock('PayumTW\Esunbank\Api')
+        );
+
+        $api->shouldReceive('getTransactionData')->once()->with((array) $request->getModel())->andReturn($params = ['foo' => 'bar']);
+
         $action->execute($request);
 
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        $request->shouldHaveReceived('getModel')->twice();
-        $api->shouldHaveReceived('getTransactionData')->once();
-        $details->shouldHaveReceived('replace')->once();
+        $this->assertSame($params, (array) $request->getModel());
     }
 }

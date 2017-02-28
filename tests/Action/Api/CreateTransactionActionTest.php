@@ -1,58 +1,37 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests\Api;
+
 use Mockery as m;
-use Payum\Core\Reply\HttpResponse;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use PHPUnit\Framework\TestCase;
+use Payum\Core\Reply\HttpPostRedirect;
+use PayumTW\Esunbank\Request\Api\CreateTransaction;
 use PayumTW\Esunbank\Action\Api\CreateTransactionAction;
 
-class CreateTransactionActionTest extends PHPUnit_Framework_TestCase
+class CreateTransactionActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_get_transaction_data()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $api = m::mock('PayumTW\Esunbank\Api');
-        $request = m::mock('PayumTW\Esunbank\Request\Api\CreateTransaction');
-        $details = new ArrayObject();
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request->shouldReceive('getModel')->twice()->andReturn($details);
-
-        $api
-            ->shouldReceive('getApiEndpoint')->once()->andReturn('fooApiEndpoint')
-            ->shouldReceive('createTransaction')->once()->andReturn([
-                'foo' => 'bar',
-            ]);
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
         $action = new CreateTransactionAction();
-        $action->setApi($api);
+        $request = new CreateTransaction([]);
+
+        $action->setApi(
+            $api = m::mock('PayumTW\Esunbank\Api')
+        );
+
+        $api->shouldReceive('getApiEndpoint')->once()->andReturn($apiEndpoint = 'foo');
+        $api->shouldReceive('createTransaction')->once()->with((array) $request->getModel())->andReturn($params = ['foo' => 'bar']);
+
         try {
             $action->execute($request);
-        } catch (HttpResponse $response) {
-            $this->assertSame('fooApiEndpoint', $response->getUrl());
-            $this->assertSame([
-                'foo' => 'bar',
-            ], $response->getFields());
+        } catch (HttpPostRedirect $e) {
+            $this->assertSame($apiEndpoint, $e->getUrl());
+            $this->assertSame($params, $e->getFields());
         }
     }
 }

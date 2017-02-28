@@ -32,11 +32,13 @@ class Api
      *
      * @throws \Payum\Core\Exception\InvalidArgumentException if an option is invalid
      */
-    public function __construct(array $options, HttpClientInterface $client, MessageFactory $messageFactory)
+    public function __construct(array $options, HttpClientInterface $client, MessageFactory $messageFactory, Encrypter $encrypter = null)
     {
         $this->options = $options;
         $this->client = $client;
         $this->messageFactory = $messageFactory;
+        $this->encrypter = $encrypter ?: new Encrypter();
+        $this->encrypter->setKey($this->options['M']);
     }
 
     /**
@@ -46,11 +48,9 @@ class Api
      */
     protected function doRequest(array $fields, $type = 'sync')
     {
-        $headers = [
+        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type),  [
             'Content-Type' => 'application/x-www-form-urlencoded',
-        ];
-
-        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type), $headers, http_build_query($fields));
+        ], http_build_query($this->encrypter->encryptRequest($fields)));
 
         $response = $this->client->send($request);
 
@@ -58,14 +58,33 @@ class Api
             throw HttpException::factory($request, $response);
         }
 
-        $details = [];
-        parse_str($response->getBody()->getContents(), $details);
+        $query = [];
+        parse_str($response->getBody()->getContents(), $query);
 
-        if (empty($details['DATA']) === true) {
+        if (empty($query['DATA']) === true) {
             throw new LogicException('Response content is not valid');
         }
 
-        return $details;
+        $data = json_decode($query['DATA'], true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $data = $this->parseResponse($query);
+        }
+
+        if (isset($data['returnCode']) === true) {
+            $query['returnCode'] = $data['returnCode'];
+        }
+
+        if (isset($data['version']) === true) {
+            $query['version'] = $data['version'];
+        }
+
+        if (isset($data['txnData']) === true) {
+            $query = array_merge($query, $data['txnData']);
+            unset($data['txnData']);
+        }
+
+        return array_merge($query, $data);
     }
 
     /**
@@ -127,6 +146,8 @@ class Api
 
         if (empty($params['IC']) === true) {
             unset($params['IC']);
+        } else {
+            $params['TID'] = 'EC000002';
         }
 
         $params['BPF'] = strtoupper($params['BPF']);
@@ -134,7 +155,7 @@ class Api
             unset($params['BPF']);
         }
 
-        return $this->prepareRequestData($params);
+        return $this->encrypter->encryptRequest($params);
     }
 
     /**
@@ -153,25 +174,18 @@ class Api
             'MID' => $this->options['MID'],
         ];
 
-        $data = array_replace(
+        $params = array_replace(
             $supportedParams,
             array_intersect_key($params, $supportedParams)
         );
 
-        $data['ONO'] = strtoupper($data['ONO']);
-
-        $body = $this->doRequest($this->prepareRequestData($data), 'sync');
-        $response = json_decode($body['DATA'], true);
-        $details = $response['txnData'];
-        $details['response'] = $response;
-
-        return $details;
+        return $this->doRequest($params, 'sync');
     }
 
     /**
      * refundTransaction.
      *
-     * @param  array  $params
+     * @param array $params
      *
      * @return array
      */
@@ -188,22 +202,18 @@ class Api
             'C' => null,
         ];
 
-        $data = array_replace(
+        $params = array_replace(
             $supportedParams,
             array_intersect_key($params, $supportedParams)
         );
 
-        $data['ONO'] = strtoupper($data['ONO']);
-
-        $body = $this->doRequest($this->prepareRequestData($data), 'refund');
-
-        return json_decode($body['DATA'], true);
+        return $this->doRequest($params, 'refund');
     }
 
     /**
      * cancelTransaction.
      *
-     * @param  array  $params
+     * @param array $params
      *
      * @return array
      */
@@ -221,32 +231,7 @@ class Api
             array_intersect_key($params, $supportedParams)
         );
 
-        $params['ONO'] = strtoupper($params['ONO']);
-
-        $data['ONO'] = strtoupper($data['ONO']);
-
-        $body = $this->doRequest($this->prepareRequestData($data), 'cancel');
-
-        return json_decode($body['DATA'], true);
-    }
-
-    /**
-     * prepareRequestData.
-     *
-     * @method prepareRequestData
-     *
-     * @param array $params
-     * @param int   $option
-     *
-     * @return array
-     */
-    protected function prepareRequestData($params, $option = JSON_UNESCAPED_SLASHES)
-    {
-        return [
-            'data' => json_encode($params, $option),
-            'mac' => $this->calculateHash($params, $option),
-            'ksn' => 1,
-        ];
+        return $this->doRequest($params, 'cancel');
     }
 
     /**
@@ -256,11 +241,7 @@ class Api
      */
     public function calculateHash($params, $option = JSON_UNESCAPED_SLASHES)
     {
-        if (is_array($params) === true) {
-            $params = json_encode($params, $option);
-        }
-
-        return hash('sha256', $params.$this->options['M']);
+        return $this->encrypter->encrypt($params);
     }
 
     /**
@@ -274,20 +255,14 @@ class Api
      */
     public function verifyHash($macd, $data)
     {
-        return true;
-
-        $result = false;
-        if ($macd === $this->calculateHash($data)) {
-            $result = true;
-        }
-
-        return $result;
+        // 尚未確定
+        return empty($this->calculateHash($data)) === false;
     }
 
     /**
      * parseResponse.
      *
-     * @param  array $response
+     * @param array $response
      *
      * @return array
      */

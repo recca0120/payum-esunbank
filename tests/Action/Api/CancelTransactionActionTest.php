@@ -1,83 +1,32 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests\Api;
+
 use Mockery as m;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use PHPUnit\Framework\TestCase;
+use PayumTW\Esunbank\Request\Api\CancelTransaction;
 use PayumTW\Esunbank\Action\Api\CancelTransactionAction;
 
-class CancelTransactionActionTest extends PHPUnit_Framework_TestCase
+class CancelTransactionActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_execute()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $request = m::spy('PayumTW\Esunbank\Request\Api\CancelTransaction, ArrayAccess');
-        $api = m::spy('PayumTW\Esunbank\Api');
-        $input = [
-            'ONO' => 'foo',
-        ];
-        $details = new ArrayObject($input);
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $request
-            ->shouldReceive('getModel')->andReturn($details);
-
-        $api
-            ->shouldReceive('cancelTransaction')->andReturn($details);
-
         $action = new CancelTransactionAction();
-        $action->setApi($api);
+        $request = new CancelTransaction(['ONO' => 'foo']);
 
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
+        $action->setApi(
+            $api = m::mock('PayumTW\Esunbank\Api')
+        );
+
+        $api->shouldReceive('cancelTransaction')->once()->with((array) $request->getModel())->andReturn($params = ['foo' => 'bar']);
 
         $action->execute($request);
-        $request->shouldHaveReceived('getModel')->twice();
-        $api->shouldHaveReceived('cancelTransaction')->with($input)->once();
-    }
 
-    /**
-     * @expectedException Payum\Core\Exception\UnsupportedApiException
-     */
-    public function test_throw_exception_when_api_is_error()
-    {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $api = m::spy('stdClass');
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $action = new CancelTransactionAction();
-        $action->setApi($api);
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
+        $this->assertSame(array_merge(['ONO' => 'foo'], $params), (array) $request->getModel());
     }
 }

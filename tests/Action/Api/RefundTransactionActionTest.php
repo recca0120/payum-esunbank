@@ -1,46 +1,32 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests\Api;
+
 use Mockery as m;
-use Payum\Core\Bridge\Spl\ArrayObject;
+use PHPUnit\Framework\TestCase;
+use PayumTW\Esunbank\Request\Api\RefundTransaction;
 use PayumTW\Esunbank\Action\Api\RefundTransactionAction;
 
-class RefundTransactionActionTest extends PHPUnit_Framework_TestCase
+class RefundTransactionActionTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_get_transaction_data()
+    public function testExecute()
     {
-        /*
-        |------------------------------------------------------------
-        | Set
-        |------------------------------------------------------------
-        */
-
-        $api = m::mock('PayumTW\Esunbank\Api');
-        $request = m::mock('PayumTW\Esunbank\Request\Api\RefundTransaction');
-        $details = new ArrayObject(['ONO' => 'foo']);
-
-        /*
-        |------------------------------------------------------------
-        | Expectation
-        |------------------------------------------------------------
-        */
-
-        $request->shouldReceive('getModel')->twice()->andReturn($details);
-
-        $api->shouldReceive('refundTransaction')->with(['ONO' => 'foo'])->once()->andReturn($details);
-
-        /*
-        |------------------------------------------------------------
-        | Assertion
-        |------------------------------------------------------------
-        */
-
         $action = new RefundTransactionAction();
-        $action->setApi($api);
+        $request = new RefundTransaction(['ONO' => 'foo']);
+
+        $action->setApi(
+            $api = m::mock('PayumTW\Esunbank\Api')
+        );
+
+        $api->shouldReceive('refundTransaction')->once()->with((array) $request->getModel())->andReturn($params = ['foo' => 'bar']);
+
         $action->execute($request);
+
+        $this->assertSame(array_merge(['ONO' => 'foo'], $params), (array) $request->getModel());
     }
 }

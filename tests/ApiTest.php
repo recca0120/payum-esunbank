@@ -1,278 +1,574 @@
 <?php
 
+namespace PayumTW\Esunbank\Tests;
+
 use Mockery as m;
 use PayumTW\Esunbank\Api;
+use PHPUnit\Framework\TestCase;
+use Http\Adapter\Guzzle6\Client;
+use Payum\Core\Bridge\Httplug\HttplugClient;
+use Http\Message\MessageFactory\GuzzleMessageFactory;
 
-class ApiTest extends PHPUnit_Framework_TestCase
+class ApiTest extends TestCase
 {
-    public function tearDown()
+    protected function tearDown()
     {
         m::close();
     }
 
-    public function test_create_transaction()
+    protected function realHttpClient()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
+        $options = [
+            'MID' => '8080082790',
+            'M' => '8ND0W3DKWBU10I8B9F1ELX15FRG0JNUM',
+            'sandbox' => false,
+        ];
 
+        $api = new Api(
+            $options,
+            $httpClient = new HttplugClient(Client::createWithConfig(['verify' => false])),
+            $messageFactory = new GuzzleMessageFactory()
+        );
+
+        $ONO = '58B52D4711F71';
+
+        return $api;
+    }
+
+    public function testCreateTransaction()
+    {
         $options = [
             'MID' => '8089000016',
             'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
             'sandbox' => true,
         ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
 
-        $httpClient = m::spy('Payum\Core\HttpClientInterface');
-        $message = m::spy('Http\Message\MessageFactory');
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
 
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $api = new Api($options, $httpClient, $message);
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        // (1)一般交易(無分期無紅利)
-        $params = $api->createTransaction([
+        $encrypter->shouldReceive('encryptRequest')->once()->with($params = [
             'ONO' => '20160518100237',
             'U' => 'https://220.128.166.170/ACQTrans/test/print.jsp',
-            'MID' => '8089000016',
+            'MID' => $options['MID'],
             'TA' => '879',
-        ]);
-        $this->assertSame('003f4aa7ee5607c29eee3b67d2943e83a7c4ddbf1b0b28175b83df4ca2747101', $params['mac']);
+            'TID' => 'EC000001',
+        ])->andReturn($requestData = 'foo');
 
-        // (2)有分期無紅利
-        $params = $api->createTransaction([
-            'ONO' => '20160518101607',
-            'U' => 'https://220.128.166.170/ACQTrans/test/print.jsp',
+        // (1)一般交易(無分期無紅利)
+        $this->assertSame($requestData, $api->createTransaction([
+            'ONO' => $params['ONO'],
+            'U' => $params['U'],
+            'TA' => $params['TA'],
+        ]));
+    }
+
+    public function testCreateTransactionHasStagingNoBonus()
+    {
+        $options = [
             'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
+
+        $encrypter->shouldReceive('encryptRequest')->once()->with($params = [
+            'ONO' => '20160518100237',
+            'U' => 'https://220.128.166.170/ACQTrans/test/print.jsp',
+            'MID' => $options['MID'],
             'IC' => '0100106',
             'TA' => '709',
             'TID' => 'EC000002',
-        ]);
-        $this->assertSame('c8c420088a8600c467a75d8098a07ec9c000662e51e54f655d2c83f57c718541', $params['mac']);
+        ])->andReturn($requestData = 'foo');
 
-        // (3)無分期有紅利
-        $params = $api->createTransaction([
+        // (2)有分期無紅利
+        $this->assertSame($requestData, $api->createTransaction([
+            'ONO' => $params['ONO'],
+            'U' => $params['U'],
+            'IC' => $params['IC'],
+            'TA' => $params['TA'],
+        ]));
+    }
+
+    public function testCreateTransactionNoStagingHasBonus()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
+
+        $encrypter->shouldReceive('encryptRequest')->once()->with($params = [
             'ONO' => '20160518102002',
             'U' => 'https://220.128.166.170/ACQTrans/test/print.jsp',
-            'MID' => '8089000016',
+            'MID' => $options['MID'],
             'BPF' => 'Y',
             'TA' => '225',
             'TID' => 'EC000001',
-        ]);
-        $this->assertSame('374b4870a2cbbc8367eff3881455fce89b9c1bca895f5179a5a16e488f0bfb36', $params['mac']);
+        ])->andReturn($requestData = 'foo');
 
-        // (4)有分期有紅利
-        $params = $api->createTransaction([
+        // (3)無分期有紅利
+        $this->assertSame($requestData, $api->createTransaction([
+            'ONO' => $params['ONO'],
+            'U' => $params['U'],
+            'BPF' => $params['BPF'],
+            'TA' => $params['TA'],
+        ]));
+    }
+
+    public function testCreateTransactionHasStagingHasBonus()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
+
+        $encrypter->shouldReceive('encryptRequest')->once()->with($params = [
             'ONO' => '20160518102121',
             'U' => 'https://220.128.166.170/ACQTrans/test/print.jsp',
-            'MID' => '8089000016',
+            'MID' => $options['MID'],
             'BPF' => 'Y',
             'IC' => '0100106',
-            'TA' => '288',
+            'TA' => '225',
             'TID' => 'EC000002',
-        ]);
-        $this->assertSame('e2d6079a5623815c09f5108789c867beb532a630756e12d27ecb1ecc3909dffe', $params['mac']);
+        ])->andReturn($requestData = 'foo');
+
+        // (3)無分期有紅利
+        $this->assertSame($requestData, $api->createTransaction([
+            'ONO' => $params['ONO'],
+            'U' => $params['U'],
+            'BPF' => $params['BPF'],
+            'IC' => $params['IC'],
+            'TA' => $params['TA'],
+        ]));
     }
 
-    public function test_parse_response()
+    public function testParseResponse()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
         $options = [
             'MID' => '8089000016',
             'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
             'sandbox' => true,
         ];
 
-        $httpClient = m::spy('Payum\Core\HttpClientInterface');
-        $message = m::spy('Http\Message\MessageFactory');
-        $response = [
-            'DATA' => 'RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185',
-            'MACD' => 'c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee',
-        ];
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory')
+        );
 
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        $api = new Api($options, $httpClient, $message);
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
+        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224, LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
+        parse_str($content, $query);
 
         $this->assertSame([
-          'DATA' => "RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******185",
-          'MACD' => "c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee",
-          'RC' => "00",
-          'MID' => "8080000002",
-          'ONO' => "1456296932846",
-          'LTD' => "20160224",
-          'LTT' => "150228",
-          'RRN' => "506055000001",
-          'AIR' => "702715",
-          'AN' => "552199******185",
-        ], $api->parseResponse($response));
+            'DATA' => $query['DATA'],
+            'MACD' => $query['MACD'],
+            'RC' => '00',
+            'MID' => '8080000002',
+            'ONO' => '1456296932846',
+            'LTD' => '20160224',
+            'LTT' => '150228',
+            'RRN' => '506055000001',
+            'AIR' => '702715',
+            'AN' => '552199******1856',
+        ], $query = $api->parseResponse($query));
+
+        $this->assertTrue($api->verifyHash($query['MACD'], $query));
     }
 
-    public function test_desktop_endpoint_url()
+    public function testParseResponseHasStagingNoBonus()
     {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $httpClient = m::spy('Payum\Core\HttpClientInterface');
-        $message = m::spy('Http\Message\MessageFactory');
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        $options = [
-            'MID' => '8089000016',
-            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-            'sandbox' => true,
-        ];
-        $api = new Api($options, $httpClient, $message);
-        $this->assertSame('https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s', $api->getApiEndpoint());
-
-        $options = [
-            'MID' => '8089000016',
-            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-            'sandbox' => false,
-        ];
-        $api = new Api($options, $httpClient, $message);
-        $this->assertSame('https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s', $api->getApiEndpoint());
-    }
-
-    public function test_mobile_endpoint_url()
-    {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $httpClient = m::spy('Payum\Core\HttpClientInterface');
-        $message = m::spy('Http\Message\MessageFactory');
-
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
-
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
-
-        $options = [
-            'MID' => '8089000016',
-            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-            'mobile' => true,
-            'sandbox' => true,
-        ];
-        $api = new Api($options, $httpClient, $message);
-        $this->assertSame('https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m', $api->getApiEndpoint());
-
-        $options = [
-            'MID' => '8089000016',
-            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
-            'mobile' => true,
-            'sandbox' => false,
-        ];
-        $api = new Api($options, $httpClient, $message);
-        $this->assertSame('https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m', $api->getApiEndpoint());
-    }
-
-    public function test_refund_transaction()
-    {
-        /*
-        |------------------------------------------------------------
-        | Arrange
-        |------------------------------------------------------------
-        */
-
-        $httpClient = m::spy('Payum\Core\HttpClientInterface');
-        $message = m::spy('Http\Message\MessageFactory');
-        $request = m::spy('Psr\Http\Message\RequestInterface');
-        $response = m::spy('Psr\Http\Message\ResponseInterface');
-
         $options = [
             'MID' => '8089000016',
             'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
             'sandbox' => true,
         ];
 
-        $responseValue = 'DATA=RC=00,MID=8089000016,ONO=1456296932846,LTD=20090605,LTT=151930&MACD=fb823f94e7584be22a2391843f6c6bdb99c9c9cba293b4cdd5de2155b1c2f09a';
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory')
+        );
 
-        /*
-        |------------------------------------------------------------
-        | Act
-        |------------------------------------------------------------
-        */
+        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,ITA=300.00,IP=3,IFPA=100.00,IPA=100.00&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
+        parse_str($content, $query);
 
-        $message
-            ->shouldReceive('createRequest')->andReturn($request);
+        $this->assertSame([
+            'DATA' => $query['DATA'],
+            'MACD' => $query['MACD'],
+            'RC' => '00',
+            'MID' => '8080000002',
+            'ONO' => '1456296932846',
+            'LTD' => '20160224',
+            'LTT' => '150228',
+            'RRN' => '506055000001',
+            'AIR' => '702715',
+            'AN' => '552199******1856',
+            'ITA' => '300.00',
+            'IP' => '3',
+            'IFPA' => '100.00',
+            'IPA' => '100.00',
+        ], $query = $api->parseResponse($query));
 
-        $httpClient
-            ->shouldReceive('send')->with($request)->andReturn($response);
+        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+    }
 
-        $response
-            ->shouldReceive('getStatusCode')->andReturn(200)
-            ->shouldReceive('getBody->getContents')->andReturn($responseValue);
+    public function testParseResponseNoStagingHasBonus()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
 
-        $api = new Api($options, $httpClient, $message);
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory')
+        );
 
-        /*
-        |------------------------------------------------------------
-        | Assert
-        |------------------------------------------------------------
-        */
+        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,BRP=0,BB=0,BRA=0.00&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
+        parse_str($content, $query);
 
-        var_dump($api->refundTransaction([
-            'TYP' => '05',
-            'ONO' => '1452836854182',
+        $this->assertSame([
+            'DATA' => $query['DATA'],
+            'MACD' => $query['MACD'],
+            'RC' => '00',
+            'MID' => '8080000002',
+            'ONO' => '1456296932846',
+            'LTD' => '20160224',
+            'LTT' => '150228',
+            'RRN' => '506055000001',
+            'AIR' => '702715',
+            'AN' => '552199******1856',
+            'BRP' => '0',
+            'BB' => '0',
+            'BRA' => '0.00',
+        ], $query = $api->parseResponse($query));
+
+        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+    }
+
+    public function testParseResponseHasStagingHasBonus()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory')
+        );
+
+        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,ITA=300.00,IP=3,IFPA=100.00,IPA=100.00,BRP=0,BB=0,BRA=0.00&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
+        parse_str($content, $query);
+
+        $this->assertSame([
+            'DATA' => $query['DATA'],
+            'MACD' => $query['MACD'],
+            'RC' => '00',
+            'MID' => '8080000002',
+            'ONO' => '1456296932846',
+            'LTD' => '20160224',
+            'LTT' => '150228',
+            'RRN' => '506055000001',
+            'AIR' => '702715',
+            'AN' => '552199******1856',
+            'ITA' => '300.00',
+            'IP' => '3',
+            'IFPA' => '100.00',
+            'IPA' => '100.00',
+            'BRP' => '0',
+            'BB' => '0',
+            'BRA' => '0.00',
+        ], $query = $api->parseResponse($query));
+
+        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+    }
+
+    public function testParseResponseFail()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory')
+        );
+
+        $content = 'DATA=RC=G1,MID=8080000002,ONO=1456296932846';
+        parse_str($content, $query);
+
+        $this->assertSame([
+            'DATA' => $query['DATA'],
+            'RC' => 'G1',
+            'MID' => '8080000002',
+            'ONO' => '1456296932846',
+        ], $query = $api->parseResponse($query));
+    }
+
+    public function testGetTransactionData()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
+
+        $encrypter->shouldReceive('encryptRequest')->once()->with([
+            'ONO' => $ONO = '58B52D4711F71',
+            'MID' => $options['MID'],
+        ])->andReturn($params = ['foo' => 'bar']);
+
+        $messageFactory->shouldReceive('createRequest')->once()->with('POST', 'https://acqtest.esunbank.com.tw/ACQQuery/esuncard/txnf0180', [
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ], http_build_query($params))->andReturn($request = m::mock('Psr\Http\Message\RequestInterface'));
+
+        $httpClient->shouldReceive('send')->once()->with($request)->andReturn($response = m::mock('Psr\Http\Message\ResponseInterface'));
+        $response->shouldReceive('getStatusCode')->twice()->andReturn(200);
+        $response->shouldReceive('getBody->getContents')->once()->andReturn(
+            $content = 'DATA={"returnCode":"00","txnData":{"RC":"00","ONO":"58B52D4711F71","MID":"8080082790","AIR":"649188","TXNAMOUNT":"100.00","LTD":"20170228","LTT":"155734","RRN":"247059001425"},"version":"2"}'
+        );
+
+        $this->assertSame([
+            'DATA' => str_replace('DATA=', '', $content),
+            'returnCode' => '00',
+            'version' => '2',
+            'RC' => '00',
+            'ONO' => '58B52D4711F71',
+            'MID' => '8080082790',
+            'AIR' => '649188',
+            'TXNAMOUNT' => '100.00',
+            'LTD' => '20170228',
+            'LTT' => '155734',
+            'RRN' => '247059001425',
+        ], $api->getTransactionData([
+            'ONO' => $ONO,
         ]));
+    }
 
-
-        $this->assertSame(hash('sha256', '{"TYP":"05","ONO":"1452836854182","MID":"8089000016"}WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B'), $api->calculateHash([
-            'TYP' => '05',
-            'ONO' => '1452836854182',
+    public function testRefundTransaction()
+    {
+        $options = [
             'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
+
+        $encrypter->shouldReceive('encryptRequest')->once()->with([
+            'TYP' => $TYP = '71',
+            'ONO' => $ONO = '58B52D4711F71',
+            'MID' => $options['MID'],
+            'C' => null,
+        ])->andReturn($params = ['foo' => 'bar']);
+
+        $messageFactory->shouldReceive('createRequest')->once()->with('POST', 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf0160', [
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ], http_build_query($params))->andReturn($request = m::mock('Psr\Http\Message\RequestInterface'));
+
+        $httpClient->shouldReceive('send')->once()->with($request)->andReturn($response = m::mock('Psr\Http\Message\ResponseInterface'));
+        $response->shouldReceive('getStatusCode')->twice()->andReturn(200);
+        $response->shouldReceive('getBody->getContents')->once()->andReturn(
+            $content = 'DATA=RC=00,MID=8089000016,ONO=1456296932846,LTD=20090605,LTT=151930&MACD=fb823f94e7584be22a2391843f6c6bdb99c9c9cba293b4cdd5de2155b1c2f09a'
+        );
+
+        $this->assertSame([
+            'DATA' => 'RC=00,MID=8089000016,ONO=1456296932846,LTD=20090605,LTT=151930',
+            'MACD' => 'fb823f94e7584be22a2391843f6c6bdb99c9c9cba293b4cdd5de2155b1c2f09a',
+            'RC' => '00',
+            'MID' => '8089000016',
+            'ONO' => '1456296932846',
+            'LTD' => '20090605',
+            'LTT' => '151930',
+        ], $api->refundTransaction([
+            'ONO' => $ONO,
         ]));
     }
+
+    public function testCancelTransaction()
+    {
+        $options = [
+            'MID' => '8089000016',
+            'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+            'sandbox' => true,
+        ];
+        $encrypter = m::mock('PayumTW\Esunbank\Encrypter');
+        $encrypter->shouldReceive('setKey')->once()->with($options['M']);
+
+        $api = new Api(
+            $options,
+            $httpClient = m::mock('Payum\Core\HttpClientInterface'),
+            $messageFactory = m::mock('Http\Message\MessageFactory'),
+            $encrypter
+        );
+
+        $encrypter->shouldReceive('encryptRequest')->once()->with([
+            'ONO' => $ONO = '58B52D4711F71',
+            'MID' => $options['MID'],
+        ])->andReturn($params = ['foo' => 'bar']);
+
+        $messageFactory->shouldReceive('createRequest')->once()->with('POST', 'https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf0150', [
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ], http_build_query($params))->andReturn($request = m::mock('Psr\Http\Message\RequestInterface'));
+
+        $httpClient->shouldReceive('send')->once()->with($request)->andReturn($response = m::mock('Psr\Http\Message\ResponseInterface'));
+        $response->shouldReceive('getStatusCode')->twice()->andReturn(200);
+        $response->shouldReceive('getBody->getContents')->once()->andReturn(
+            $content = 'DATA={"returnCode":"00","txnData":{"RC":"00","ONO":"1462519794752","MID":"8089000016","AIR":"730942","LTD":"20160506","LTT":"153032","RRN":"106127000019"},"version":"2"}'
+        );
+
+        $this->assertSame([
+            'DATA' => '{"returnCode":"00","txnData":{"RC":"00","ONO":"1462519794752","MID":"8089000016","AIR":"730942","LTD":"20160506","LTT":"153032","RRN":"106127000019"},"version":"2"}',
+            'returnCode' => '00',
+            'version' => '2',
+            'RC' => '00',
+            'ONO' => '1462519794752',
+            'MID' => '8089000016',
+            'AIR' => '730942',
+            'LTD' => '20160506',
+            'LTT' => '153032',
+            'RRN' => '106127000019',
+        ], $api->cancelTransaction([
+            'ONO' => $ONO,
+        ]));
+    }
+
+    // public function test_desktop_endpoint_url()
+    // {
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Arrange
+    //     |------------------------------------------------------------
+    //     */
+
+    //     $httpClient = m::spy('Payum\Core\HttpClientInterface');
+    //     $message = m::spy('Http\Message\MessageFactory');
+
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Act
+    //     |------------------------------------------------------------
+    //     */
+
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Assert
+    //     |------------------------------------------------------------
+    //     */
+
+    //     $options = [
+    //         'MID' => '8089000016',
+    //         'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+    //         'sandbox' => true,
+    //     ];
+    //     $api = new Api($options, $httpClient, $message);
+    //     $this->assertSame('https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014s', $api->getApiEndpoint());
+
+    //     $options = [
+    //         'MID' => '8089000016',
+    //         'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+    //         'sandbox' => false,
+    //     ];
+    //     $api = new Api($options, $httpClient, $message);
+    //     $this->assertSame('https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014s', $api->getApiEndpoint());
+    // }
+
+    // public function test_mobile_endpoint_url()
+    // {
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Arrange
+    //     |------------------------------------------------------------
+    //     */
+
+    //     $httpClient = m::spy('Payum\Core\HttpClientInterface');
+    //     $message = m::spy('Http\Message\MessageFactory');
+
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Act
+    //     |------------------------------------------------------------
+    //     */
+
+    //     /*
+    //     |------------------------------------------------------------
+    //     | Assert
+    //     |------------------------------------------------------------
+    //     */
+
+    //     $options = [
+    //         'MID' => '8089000016',
+    //         'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+    //         'mobile' => true,
+    //         'sandbox' => true,
+    //     ];
+    //     $api = new Api($options, $httpClient, $message);
+    //     $this->assertSame('https://acqtest.esunbank.com.tw/ACQTrans/esuncard/txnf014m', $api->getApiEndpoint());
+
+    //     $options = [
+    //         'MID' => '8089000016',
+    //         'M' => 'WEGSC0Q7BAJGTQYL8BV8KRQRZXH6VK0B',
+    //         'mobile' => true,
+    //         'sandbox' => false,
+    //     ];
+    //     $api = new Api($options, $httpClient, $message);
+    //     $this->assertSame('https://acq.esunbank.com.tw/ACQTrans/esuncard/txnf014m', $api->getApiEndpoint());
+    // }
 }
