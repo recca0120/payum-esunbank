@@ -61,30 +61,43 @@ class Api
         $query = [];
         parse_str($response->getBody()->getContents(), $query);
 
-        if (empty($query['DATA']) === true) {
+        return $this->parseResponse($query);
+    }
+
+    /**
+     * parseResponse.
+     *
+     * @param array $response
+     *
+     * @return array
+     */
+    public function parseResponse($response)
+    {
+        if (empty($response['DATA']) === true) {
             throw new LogicException('Response content is not valid');
         }
 
-        $data = json_decode($query['DATA'], true);
+        $data = json_decode($response['DATA'], true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            $data = $this->parseResponse($query);
+            $data = [];
+            parse_str(str_replace(',', '&', $response['DATA']), $data);
         }
 
         if (isset($data['returnCode']) === true) {
-            $query['returnCode'] = $data['returnCode'];
+            $response['returnCode'] = $data['returnCode'];
         }
 
         if (isset($data['version']) === true) {
-            $query['version'] = $data['version'];
+            $response['version'] = $data['version'];
         }
 
         if (isset($data['txnData']) === true) {
-            $query = array_merge($query, $data['txnData']);
+            $response = array_merge($response, $data['txnData']);
             unset($data['txnData']);
         }
 
-        return array_merge($query, $data);
+        return array_merge($response, $data);
     }
 
     /**
@@ -257,21 +270,6 @@ class Api
     {
         // 尚未確定
         return empty($this->calculateHash($data)) === false;
-    }
-
-    /**
-     * parseResponse.
-     *
-     * @param array $response
-     *
-     * @return array
-     */
-    public function parseResponse($response)
-    {
-        $result = [];
-        parse_str(str_replace(',', '&', $response['DATA']), $result);
-
-        return array_merge($response, $result);
     }
 
     /**
