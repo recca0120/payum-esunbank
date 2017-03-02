@@ -63,7 +63,7 @@ class CaptureActionTest extends TestCase
         );
 
         $api->shouldReceive('parseResponse')->once()->with($query)->andReturn($query);
-        $api->shouldReceive('verifyHash')->once()->with($query['MACD'], m::any())->andReturn(true);
+        $api->shouldReceive('verifyHash')->once()->with($query['MACD'], m::type('array'))->andReturn(true);
 
         $action->execute($request);
         $this->assertSame($query, (array) $request->getModel());
