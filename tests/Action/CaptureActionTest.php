@@ -63,7 +63,7 @@ class CaptureActionTest extends TestCase
         );
 
         $api->shouldReceive('parseResponse')->once()->with($query)->andReturn($query);
-        $api->shouldReceive('verifyHash')->once()->with($query['MACD'], m::type('array'))->andReturn(true);
+        $api->shouldReceive('verifyHash')->once()->with($query, m::type('array'))->andReturn(true);
 
         $action->execute($request);
         $this->assertSame($query, (array) $request->getModel());
@@ -95,9 +95,9 @@ class CaptureActionTest extends TestCase
         );
 
         $api->shouldReceive('parseResponse')->once()->with($query)->andReturn($query);
-        $api->shouldReceive('verifyHash')->once()->with($query['MACD'], m::any())->andReturn(false);
+        $api->shouldReceive('verifyHash')->once()->with($query, m::any())->andReturn(false);
 
         $action->execute($request);
-        $this->assertSame(array_merge($query, ['RC' => '-1']), (array) $request->getModel());
+        $this->assertSame(array_merge($query, ['RC' => 'G9']), (array) $request->getModel());
     }
 }
