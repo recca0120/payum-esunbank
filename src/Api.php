@@ -266,8 +266,9 @@ class Api
      *
      * @return bool
      */
-    public function verifyHash($macd, $data)
+    public function verifyHash($response, $data)
     {
+        // $response['MACD'];
         // 尚未確定
         return empty($this->calculateHash($data)) === false;
     }
