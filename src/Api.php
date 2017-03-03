@@ -58,10 +58,9 @@ class Api
             throw HttpException::factory($request, $response);
         }
 
-        $query = [];
-        parse_str($response->getBody()->getContents(), $query);
-
-        return $this->parseResponse($query);
+        return $this->parseResponse(
+            $response->getBody()->getContents()
+        );
     }
 
     /**
@@ -73,6 +72,10 @@ class Api
      */
     public function parseResponse($response)
     {
+        if (is_string($response) === true) {
+            $response = $this->parseStr($response);
+        }
+
         if (empty($response['DATA']) === true) {
             throw new LogicException('Response content is not valid');
         }
@@ -98,6 +101,14 @@ class Api
         }
 
         return array_merge($response, $data);
+    }
+
+    protected function parseStr($str)
+    {
+        $response = [];
+        parse_str($str, $response);
+
+        return $response;
     }
 
     /**
@@ -252,7 +263,7 @@ class Api
      *
      * @return string
      */
-    public function calculateHash($params, $option = JSON_UNESCAPED_SLASHES)
+    public function calculateHash($params)
     {
         return $this->encrypter->encrypt($params);
     }
@@ -266,11 +277,12 @@ class Api
      *
      * @return bool
      */
-    public function verifyHash($response, $data)
+    public function verifyHash($response)
     {
-        // $response['MACD'];
         // 尚未確定
-        return empty($this->calculateHash($data)) === false;
+        return empty($response['MACD']) === true
+            ? false
+            : $this->calculateHash($response) === $response['MACD'];
     }
 
     /**

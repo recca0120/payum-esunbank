@@ -46,14 +46,14 @@ class CaptureActionTest extends TestCase
             $gateway = m::mock('Payum\Core\GatewayInterface')
         );
 
-        $query = [
+        $response = [
             'DATA' => 'foo',
             'MACD' => 'foo',
             'RC' => '00',
         ];
 
-        $gateway->shouldReceive('execute')->once()->with(m::on(function ($httpRequest) use ($query) {
-            $httpRequest->request = $query;
+        $gateway->shouldReceive('execute')->once()->with(m::on(function ($httpRequest) use ($response) {
+            $httpRequest->request = $response;
 
             return $httpRequest instanceof GetHttpRequest;
         }));
@@ -62,11 +62,11 @@ class CaptureActionTest extends TestCase
             $api = m::mock('PayumTW\Esunbank\Api')
         );
 
-        $api->shouldReceive('parseResponse')->once()->with($query)->andReturn($query);
-        $api->shouldReceive('verifyHash')->once()->with($query, m::type('array'))->andReturn(true);
+        $api->shouldReceive('parseResponse')->once()->with($response)->andReturn($response);
+        $api->shouldReceive('verifyHash')->once()->with($response)->andReturn(true);
 
         $action->execute($request);
-        $this->assertSame($query, (array) $request->getModel());
+        $this->assertSame($response, (array) $request->getModel());
     }
 
     public function testCaptureFail()
@@ -78,14 +78,14 @@ class CaptureActionTest extends TestCase
             $gateway = m::mock('Payum\Core\GatewayInterface')
         );
 
-        $query = [
+        $response = [
             'DATA' => 'foo',
             'MACD' => 'foo',
             'RC' => '00',
         ];
 
-        $gateway->shouldReceive('execute')->once()->with(m::on(function ($httpRequest) use ($query) {
-            $httpRequest->request = $query;
+        $gateway->shouldReceive('execute')->once()->with(m::on(function ($httpRequest) use ($response) {
+            $httpRequest->request = $response;
 
             return $httpRequest instanceof GetHttpRequest;
         }));
@@ -94,10 +94,10 @@ class CaptureActionTest extends TestCase
             $api = m::mock('PayumTW\Esunbank\Api')
         );
 
-        $api->shouldReceive('parseResponse')->once()->with($query)->andReturn($query);
-        $api->shouldReceive('verifyHash')->once()->with($query, m::any())->andReturn(false);
+        $api->shouldReceive('parseResponse')->once()->with($response)->andReturn($response);
+        $api->shouldReceive('verifyHash')->once()->with($response)->andReturn(false);
 
         $action->execute($request);
-        $this->assertSame(array_merge($query, ['RC' => 'G9']), (array) $request->getModel());
+        $this->assertSame(array_merge($response, ['RC' => 'G9']), (array) $request->getModel());
     }
 }

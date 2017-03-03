@@ -189,12 +189,13 @@ class ApiTest extends TestCase
             $messageFactory = m::mock('Http\Message\MessageFactory')
         );
 
-        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224, LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
-        parse_str($content, $query);
+        $response = $api->parseResponse(
+            $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856&MACD=fe58d597b3314776d600887c513bbf224a1d4be3d98b0f076be81d32086ec3cb'
+        );
 
         $this->assertSame([
-            'DATA' => $query['DATA'],
-            'MACD' => $query['MACD'],
+            'DATA' => $response['DATA'],
+            'MACD' => $response['MACD'],
             'RC' => '00',
             'MID' => '8080000002',
             'ONO' => '1456296932846',
@@ -203,9 +204,9 @@ class ApiTest extends TestCase
             'RRN' => '506055000001',
             'AIR' => '702715',
             'AN' => '552199******1856',
-        ], $query = $api->parseResponse($query));
+        ], $api->parseResponse($response));
 
-        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+        $this->assertTrue($api->verifyHash($response));
     }
 
     public function testParseResponseHasStagingNoBonus()
@@ -222,12 +223,13 @@ class ApiTest extends TestCase
             $messageFactory = m::mock('Http\Message\MessageFactory')
         );
 
-        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,ITA=300.00,IP=3,IFPA=100.00,IPA=100.00&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
-        parse_str($content, $query);
+        $response = $api->parseResponse(
+            $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,ITA=300.00,IP=3,IFPA=100.00,IPA=100.00&MACD=51e649ad1e47551da41ea6eeb183f57ebf888a7bf81e9420028044c70a88880c'
+        );
 
         $this->assertSame([
-            'DATA' => $query['DATA'],
-            'MACD' => $query['MACD'],
+            'DATA' => $response['DATA'],
+            'MACD' => $response['MACD'],
             'RC' => '00',
             'MID' => '8080000002',
             'ONO' => '1456296932846',
@@ -240,9 +242,9 @@ class ApiTest extends TestCase
             'IP' => '3',
             'IFPA' => '100.00',
             'IPA' => '100.00',
-        ], $query = $api->parseResponse($query));
+        ], $response);
 
-        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+        $this->assertTrue($api->verifyHash($response));
     }
 
     public function testParseResponseNoStagingHasBonus()
@@ -259,12 +261,13 @@ class ApiTest extends TestCase
             $messageFactory = m::mock('Http\Message\MessageFactory')
         );
 
-        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,BRP=0,BB=0,BRA=0.00&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
-        parse_str($content, $query);
+        $response = $api->parseResponse(
+            $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,BRP=0,BB=0,BRA=0.00&MACD=76584fb23a4cffd072ffdde1b9a4d30770559bca7e7d3da1b92c603991eafad5'
+        );
 
         $this->assertSame([
-            'DATA' => $query['DATA'],
-            'MACD' => $query['MACD'],
+            'DATA' => $response['DATA'],
+            'MACD' => $response['MACD'],
             'RC' => '00',
             'MID' => '8080000002',
             'ONO' => '1456296932846',
@@ -276,9 +279,9 @@ class ApiTest extends TestCase
             'BRP' => '0',
             'BB' => '0',
             'BRA' => '0.00',
-        ], $query = $api->parseResponse($query));
+        ], $response);
 
-        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+        $this->assertTrue($api->verifyHash($response));
     }
 
     public function testParseResponseHasStagingHasBonus()
@@ -295,12 +298,13 @@ class ApiTest extends TestCase
             $messageFactory = m::mock('Http\Message\MessageFactory')
         );
 
-        $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,ITA=300.00,IP=3,IFPA=100.00,IPA=100.00,BRP=0,BB=0,BRA=0.00&MACD=c9bf69b8489acb6d0b49f238e8e97ffd150466ac23dbf03d721e7c4a1c7b13ee';
-        parse_str($content, $query);
+        $response = $api->parseResponse(
+            $content = 'DATA=RC=00,MID=8080000002,ONO=1456296932846,LTD=20160224,LTT=150228,RRN=506055000001,AIR=702715,AN=552199******1856,ITA=300.00,IP=3,IFPA=100.00,IPA=100.00,BRP=0,BB=0,BRA=0.00&MACD=169d4d8f59112243b8f344f2eaccf950f189e862306cc7cff636959cb742b56b'
+        );
 
         $this->assertSame([
-            'DATA' => $query['DATA'],
-            'MACD' => $query['MACD'],
+            'DATA' => $response['DATA'],
+            'MACD' => $response['MACD'],
             'RC' => '00',
             'MID' => '8080000002',
             'ONO' => '1456296932846',
@@ -316,9 +320,9 @@ class ApiTest extends TestCase
             'BRP' => '0',
             'BB' => '0',
             'BRA' => '0.00',
-        ], $query = $api->parseResponse($query));
+        ], $response);
 
-        $this->assertTrue($api->verifyHash($query['MACD'], $query));
+        $this->assertTrue($api->verifyHash($response));
     }
 
     public function testParseResponseFail()
@@ -335,15 +339,16 @@ class ApiTest extends TestCase
             $messageFactory = m::mock('Http\Message\MessageFactory')
         );
 
-        $content = 'DATA=RC=G1,MID=8080000002,ONO=1456296932846';
-        parse_str($content, $query);
+        $response = $api->parseResponse(
+            $content = 'DATA=RC=G1,MID=8080000002,ONO=1456296932846'
+        );
 
         $this->assertSame([
-            'DATA' => $query['DATA'],
+            'DATA' => $response['DATA'],
             'RC' => 'G1',
             'MID' => '8080000002',
             'ONO' => '1456296932846',
-        ], $query = $api->parseResponse($query));
+        ], $response);
     }
 
     public function testGetTransactionData()
