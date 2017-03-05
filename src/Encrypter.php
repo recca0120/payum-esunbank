@@ -6,6 +6,11 @@ class Encrypter
 {
     protected $key;
 
+    /**
+     * setKey.
+     *
+     * @param string $key [description]
+     */
     public function setKey($key)
     {
         $this->key = $key;
@@ -13,6 +18,11 @@ class Encrypter
         return $this;
     }
 
+    /**
+     * encrypt.
+     * @param array $attributes
+     * @return string
+     */
     public function encrypt($attributes = [])
     {
         if (isset($attributes['MACD']) === true) {
@@ -29,6 +39,13 @@ class Encrypter
         return hash('sha256', $string.$this->key);
     }
 
+    /**
+     * encryptRequest.
+     *
+     * @param array $attributes
+     * @param int $ksn
+     * @return array
+     */
     public function encryptRequest($attributes, $ksn = 1)
     {
         return [

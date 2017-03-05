@@ -11,12 +11,12 @@ use Payum\Core\Exception\Http\HttpException;
 class Api
 {
     /**
-     * @var HttpClientInterface
+     * @var \Payum\Core\HttpClientInterface
      */
     protected $client;
 
     /**
-     * @var MessageFactory
+     * @var \Http\Message\MessageFactory
      */
     protected $messageFactory;
 
@@ -27,8 +27,9 @@ class Api
 
     /**
      * @param array $options
-     * @param HttpClientInterface $client
-     * @param MessageFactory $messageFactory
+     * @param \Payum\Core\HttpClientInterface $client
+     * @param \Http\Message\MessageFactory $messageFactory
+     * @param Encrypter $encrrypter
      *
      * @throws \Payum\Core\Exception\InvalidArgumentException if an option is invalid
      */
@@ -43,7 +44,6 @@ class Api
 
     /**
      * @param array $fields
-     *
      * @return array
      */
     protected function doRequest(array $fields, $type = 'sync')
@@ -67,7 +67,6 @@ class Api
      * parseResponse.
      *
      * @param array $response
-     *
      * @return array
      */
     public function parseResponse($response)
@@ -103,6 +102,12 @@ class Api
         return array_merge($response, $data);
     }
 
+    /**
+     * parseStr.
+     *
+     * @param string $str
+     * @return array
+     */
     protected function parseStr($str)
     {
         $response = [];
@@ -141,7 +146,6 @@ class Api
      * createTransaction.
      *
      * @param array $params
-     *
      * @return array
      */
     public function createTransaction(array $params)
@@ -186,7 +190,6 @@ class Api
      * getTransactionData.
      *
      * @param mixed $params
-     *
      * @return array
      */
     public function getTransactionData(array $params)
@@ -210,7 +213,6 @@ class Api
      * refundTransaction.
      *
      * @param array $params
-     *
      * @return array
      */
     public function refundTransaction(array $params)
@@ -238,7 +240,6 @@ class Api
      * cancelTransaction.
      *
      * @param array $params
-     *
      * @return array
      */
     public function cancelTransaction(array $params)
@@ -260,7 +261,6 @@ class Api
 
     /**
      * @param array $params
-     *
      * @return string
      */
     public function calculateHash($params)
@@ -271,10 +271,7 @@ class Api
     /**
      * verifyHash.
      *
-     * @method verifyHash
-     *
      * @param array $params
-     *
      * @return bool
      */
     public function verifyHash($response)
