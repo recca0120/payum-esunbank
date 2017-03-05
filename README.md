@@ -8,6 +8,8 @@
 [![License](https://poser.pugx.org/payum-tw/esunbank/license.svg)](https://packagist.org/packages/payum-tw/esunbank)
 [![Monthly Downloads](https://poser.pugx.org/payum-tw/esunbank/d/monthly)](https://packagist.org/packages/payum-tw/esunbank)
 [![Daily Downloads](https://poser.pugx.org/payum-tw/esunbank/d/daily)](https://packagist.org/packages/payum-tw/esunbank)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/recca0120/payum-esunbank/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/recca0120/payum-esunbank/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/recca0120/payum-esunbank/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/recca0120/payum-esunbank/?branch=master)
 
 The Payum extension to rapidly build new extensions.
 
