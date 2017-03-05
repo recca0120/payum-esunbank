@@ -4,12 +4,17 @@ namespace PayumTW\Esunbank;
 
 class Encrypter
 {
+    /**
+     * $key.
+     *
+     * @var string
+     */
     protected $key;
 
     /**
      * setKey.
      *
-     * @param string $key [description]
+     * @param string $key
      */
     public function setKey($key)
     {
@@ -20,20 +25,21 @@ class Encrypter
 
     /**
      * encrypt.
-     * @param array $attributes
+     *
+     * @param array $params
      * @return string
      */
-    public function encrypt($attributes = [])
+    public function encrypt($params = [])
     {
-        if (isset($attributes['MACD']) === true) {
+        if (isset($params['MACD']) === true) {
             foreach (['DATA', 'MACD', 'returnCode', 'version'] as $key) {
-                if (isset($attributes[$key]) === true) {
-                    unset($attributes[$key]);
+                if (isset($params[$key]) === true) {
+                    unset($params[$key]);
                 }
             }
-            $string = urldecode(http_build_query($attributes, '', ',')).',';
+            $string = urldecode(http_build_query($params, '', ',')).',';
         } else {
-            $string = json_encode($attributes, JSON_UNESCAPED_SLASHES);
+            $string = json_encode($params, JSON_UNESCAPED_SLASHES);
         }
 
         return hash('sha256', $string.$this->key);
@@ -42,15 +48,15 @@ class Encrypter
     /**
      * encryptRequest.
      *
-     * @param array $attributes
+     * @param array $params
      * @param int $ksn
      * @return array
      */
-    public function encryptRequest($attributes, $ksn = 1)
+    public function encryptRequest($params, $ksn = 1)
     {
         return [
-            'data' => json_encode($attributes, JSON_UNESCAPED_SLASHES),
-            'mac' => $this->encrypt($attributes),
+            'data' => json_encode($params, JSON_UNESCAPED_SLASHES),
+            'mac' => $this->encrypt($params),
             'ksn' => $ksn,
         ];
     }

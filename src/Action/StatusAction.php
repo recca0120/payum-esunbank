@@ -28,8 +28,9 @@ class StatusAction implements ActionInterface
 
         if ($details['RC'] === '00') {
             if (isset($details['RRN']) === true) {
+                // TXNAMOUNT 單筆查詢
                 isset($details['MACD']) === true || isset($details['TXNAMOUNT']) === true
-                    ? $this->markCaptured()
+                    ? $request->markCaptured()
                     : $request->markCanceled();
 
                 return;
