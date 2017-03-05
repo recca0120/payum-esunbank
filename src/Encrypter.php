@@ -30,8 +30,8 @@ class Encrypter
                 if (isset($attributes[$key]) === true) {
                     unset($attributes[$key]);
                 }
-                $string = urldecode(http_build_query($attributes, '', ',')).',';
             }
+            $string = urldecode(http_build_query($attributes, '', ',')).',';
         } else {
             $string = json_encode($attributes, JSON_UNESCAPED_SLASHES);
         }

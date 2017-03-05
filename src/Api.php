@@ -54,7 +54,7 @@ class Api
 
         $response = $this->client->send($request);
 
-        if (false == ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
+        if (false === ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
             throw HttpException::factory($request, $response);
         }
 
@@ -153,11 +153,11 @@ class Api
         $supportedParams = [
             // 訂單編號, 由特約商店產生，不可重複，不可 包含【_】字元，英數限用大寫
             'ONO' => '',
-            // 回覆位址, 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp',
+            // 回覆位址, 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp'
             'U' => 'https://acqtest.esunbank.com.tw/ACQTrans/test/print.jsp',
             // 特店代碼
             'MID' => $this->options['MID'],
-            // 銀行紅利折抵, Y：使用銀行紅利交易。 N：不使用銀行紅利交易。
+            // 銀行紅利折抵, Y：使用銀行紅利交易。 N：不使用銀行紅利交易
             'BPF' => 'N',
             // 分期代碼, 三期：0100103  六期：0100106 正式環境參數由業務經辦提供
             'IC' => '',
