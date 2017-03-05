@@ -26,6 +26,13 @@ class Api
     protected $options = [];
 
     /**
+     * $encrypter.
+     *
+     * @var Encrypter
+     */
+    protected $encrypter;
+
+    /**
      * @param array $options
      * @param \Payum\Core\HttpClientInterface $client
      * @param \Http\Message\MessageFactory $messageFactory
