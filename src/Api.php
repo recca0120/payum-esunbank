@@ -29,7 +29,7 @@ class Api
      * @param array $options
      * @param \Payum\Core\HttpClientInterface $client
      * @param \Http\Message\MessageFactory $messageFactory
-     * @param Encrypter $encrrypter
+     * @param Encrypter $encrypter
      *
      * @throws \Payum\Core\Exception\InvalidArgumentException if an option is invalid
      */
@@ -271,7 +271,7 @@ class Api
     /**
      * verifyHash.
      *
-     * @param array $params
+     * @param array $response
      * @return bool
      */
     public function verifyHash($response)
