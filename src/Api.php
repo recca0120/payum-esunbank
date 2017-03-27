@@ -50,27 +50,6 @@ class Api
     }
 
     /**
-     * @param array $fields
-     * @return array
-     */
-    protected function doRequest(array $fields, $type = 'sync')
-    {
-        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type), [
-            'Content-Type' => 'application/x-www-form-urlencoded',
-        ], http_build_query($this->encrypter->encryptRequest($fields)));
-
-        $response = $this->client->send($request);
-
-        if (false === ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
-            throw HttpException::factory($request, $response);
-        }
-
-        return $this->parseResponse(
-            $response->getBody()->getContents()
-        );
-    }
-
-    /**
      * parseResponse.
      *
      * @param array $response
@@ -107,20 +86,6 @@ class Api
         }
 
         return array_merge($response, $data);
-    }
-
-    /**
-     * parseStr.
-     *
-     * @param string $str
-     * @return array
-     */
-    protected function parseStr($str)
-    {
-        $response = [];
-        parse_str($str, $response);
-
-        return $response;
     }
 
     /**
@@ -287,6 +252,41 @@ class Api
         return empty($response['MACD']) === true
             ? false
             : $this->calculateHash($response) === $response['MACD'];
+    }
+
+    /**
+     * @param array $fields
+     * @return array
+     */
+    protected function doRequest(array $fields, $type = 'sync')
+    {
+        $request = $this->messageFactory->createRequest('POST', $this->getApiEndpoint($type), [
+            'Content-Type' => 'application/x-www-form-urlencoded',
+        ], http_build_query($this->encrypter->encryptRequest($fields)));
+
+        $response = $this->client->send($request);
+
+        if (false === ($response->getStatusCode() >= 200 && $response->getStatusCode() < 300)) {
+            throw HttpException::factory($request, $response);
+        }
+
+        return $this->parseResponse(
+            $response->getBody()->getContents()
+        );
+    }
+
+    /**
+     * parseStr.
+     *
+     * @param string $str
+     * @return array
+     */
+    protected function parseStr($str)
+    {
+        $response = [];
+        parse_str($str, $response);
+
+        return $response;
     }
 
     /**

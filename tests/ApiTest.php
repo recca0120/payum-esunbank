@@ -16,25 +16,6 @@ class ApiTest extends TestCase
         m::close();
     }
 
-    protected function realHttpClient()
-    {
-        $options = [
-            'MID' => '8080082790',
-            'M' => '8ND0W3DKWBU10I8B9F1ELX15FRG0JNUM',
-            'sandbox' => false,
-        ];
-
-        $api = new Api(
-            $options,
-            $httpClient = new HttplugClient(Client::createWithConfig(['verify' => false])),
-            $messageFactory = new GuzzleMessageFactory()
-        );
-
-        $ONO = '58B52D4711F71';
-
-        return $api;
-    }
-
     public function testCreateTransaction()
     {
         $options = [
@@ -493,6 +474,25 @@ class ApiTest extends TestCase
         ], $api->cancelTransaction([
             'ONO' => $ONO,
         ]));
+    }
+
+    protected function realHttpClient()
+    {
+        $options = [
+            'MID' => '8080082790',
+            'M' => '8ND0W3DKWBU10I8B9F1ELX15FRG0JNUM',
+            'sandbox' => false,
+        ];
+
+        $api = new Api(
+            $options,
+            $httpClient = new HttplugClient(Client::createWithConfig(['verify' => false])),
+            $messageFactory = new GuzzleMessageFactory()
+        );
+
+        $ONO = '58B52D4711F71';
+
+        return $api;
     }
 
     // public function test_desktop_endpoint_url()
